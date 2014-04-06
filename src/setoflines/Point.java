@@ -28,6 +28,28 @@ public class Point {
 		this.position = position;
 	}
 	
+	public Point add (Point p1){
+		
+		ArrayList<Double> coordinates = new ArrayList<Double>();
+		
+		for(int i = 0; i < this.getDimension(); i++){
+			coordinates.add(this.getPosition().get(i) + p1.getPosition().get(i));
+		}
+		
+		return new Point(this.getDimension(), coordinates);
+	}
+	
+	public Point subtract (Point p1){
+		
+		ArrayList<Double> coordinates = new ArrayList<Double>();
+		
+		for(int i = 0; i < this.getDimension(); i++){
+			coordinates.add(this.getPosition().get(i) - p1.getPosition().get(i));
+		}
+		
+		return new Point(this.getDimension(), coordinates);
+	}
+	
 	
 	public boolean equals (Object o){
 		
