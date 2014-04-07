@@ -18,8 +18,8 @@ public class Pair {
 	public int hashCode(){
 		int returnCode = 0;
 		
-		for (double posX : first.getPosition()){
-			for (double posY : second.getPosition()){
+		for (double posX : first.getCoordinates()){
+			for (double posY : second.getCoordinates()){
 				returnCode += Double.valueOf(posX).hashCode() * Double.valueOf(posY).hashCode();
 			}
 		}

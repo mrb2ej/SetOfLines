@@ -2,6 +2,7 @@ package setoflines;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import net.sf.javaml.core.kdtree.KDTree;
 
 public class SetOfLines {
 
@@ -17,15 +18,18 @@ public class SetOfLines {
 	private double epsilon;
 	private int dimension;
 
-	// Add kd-tree
+	private KDTree kdtree;
 
 	public SetOfLines(ArrayList<Point> pointSet, double epsilon, int dimension) {
 
 		this.epsilon = epsilon;
 		this.dimension = dimension;
+		
+		// Create the kd-tree
+		kdtree = new KDTree(dimension);
+		populate_tree(kdtree, pointSet);
 
-		// Generate tree
-		generate_tree(pointSet);
+		// Generate all pairs
 		generate_pairs(pointSet);
 
 		// Populates maximal_lines with all maximal epsilon regular subsequences
@@ -34,11 +38,10 @@ public class SetOfLines {
 		// Select best set of lines from maximal_lines
 		generate_set_of_lines();
 		
-		// Clear maximal_lines from memory
+		// Clear all unnecessary data structures
 		maximal_lines = null;
 		unmarked_pairs = null;
-		
-		
+		kdtree = null;		
 
 	}
 	
@@ -84,8 +87,21 @@ public class SetOfLines {
 		}
 	}
 
-	private void generate_tree(ArrayList<Point> pointSet) {
-		// TODO: Add kd-tree library for Java
+	private void populate_tree(KDTree kdtree, ArrayList<Point> pointSet) {
+		
+		for(Point p : pointSet){
+			
+			ArrayList<Double> coordinates = p.getCoordinates();
+			
+			double[] key = new double[coordinates.size()];
+			
+			for(int i = 0; i < coordinates.size() - 1; i++){
+				key[i] = coordinates.get(i); 
+			}
+					
+			kdtree.insert(key, p);
+		}
+		
 	}
 
 	private void generate_pairs(ArrayList<Point> pointSet) {
@@ -176,7 +192,7 @@ public class SetOfLines {
 
 		if (next_point != null) {
 			// Check if candidate point fits the line
-			// TODO: check that
+			// TODO: check that ^
 
 			workingSet.add(next_point);
 			return true;
@@ -195,10 +211,7 @@ public class SetOfLines {
 
 			// remove from unmarked
 			unmarked_pairs.remove(new_pair);
-
-			// add to marked
-			// marked_pairs.add(new_pair);
-
+			
 		} catch (Exception e) {
 			// Dimensions don't match
 			e.printStackTrace();
@@ -218,8 +231,20 @@ public class SetOfLines {
 	}
 
 	private Point get_next_point(Point next_point_guess) {
-		// TODO: Use kd-tree library that we don't have yet
-		return null;
+				
+		double[] lower_bound = new double[dimension];
+		double[] upper_bound = new double[dimension];
+		
+		for(int i = 0; i < next_point_guess.getDimension(); i++){
+			upper_bound[i] = next_point_guess.getCoordinates().get(i) + 8 * epsilon;
+			lower_bound[i] = next_point_guess.getCoordinates().get(i) - 8 * epsilon;
+		}			
+		
+		Object[] returned_value = kdtree.range(lower_bound, upper_bound);
+		
+		if (returned_value.length == 0) return null;
+		
+		return (Point) returned_value[0];
 
 	}
 

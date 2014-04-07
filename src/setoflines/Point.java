@@ -5,11 +5,11 @@ import java.util.ArrayList;
 public class Point {
 	
 	private int dimension;
-	private ArrayList<Double> position;
+	private ArrayList<Double> coordinates;
 	
 	public Point (int dimension, ArrayList<Double> position){
 		this.dimension = dimension;
-		this.position = new ArrayList<Double>(position);
+		this.coordinates = new ArrayList<Double>(position);
 	}
 	
 	public int getDimension() {
@@ -20,12 +20,12 @@ public class Point {
 		this.dimension = dimension;
 	}
 
-	public ArrayList<Double> getPosition() {
-		return position;
+	public ArrayList<Double> getCoordinates() {
+		return coordinates;
 	}
 
-	public void setPosition(ArrayList<Double> position) {
-		this.position = position;
+	public void setCoordinates(ArrayList<Double> position) {
+		this.coordinates = position;
 	}
 	
 	public Point add (Point p1){
@@ -33,7 +33,7 @@ public class Point {
 		ArrayList<Double> coordinates = new ArrayList<Double>();
 		
 		for(int i = 0; i < this.getDimension(); i++){
-			coordinates.add(this.getPosition().get(i) + p1.getPosition().get(i));
+			coordinates.add(this.getCoordinates().get(i) + p1.getCoordinates().get(i));
 		}
 		
 		return new Point(this.getDimension(), coordinates);
@@ -44,7 +44,7 @@ public class Point {
 		ArrayList<Double> coordinates = new ArrayList<Double>();
 		
 		for(int i = 0; i < this.getDimension(); i++){
-			coordinates.add(this.getPosition().get(i) - p1.getPosition().get(i));
+			coordinates.add(this.getCoordinates().get(i) - p1.getCoordinates().get(i));
 		}
 		
 		return new Point(this.getDimension(), coordinates);
@@ -60,7 +60,7 @@ public class Point {
 		Point otherpoint = (Point) o;
 		
 		for (int i = 0; i < this.getDimension(); i++ ){
-			if (this.getPosition().get(i) != otherpoint.getPosition().get(i)){
+			if (this.getCoordinates().get(i) != otherpoint.getCoordinates().get(i)){
 				return false;
 			}
 		}
