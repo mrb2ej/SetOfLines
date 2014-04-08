@@ -89,13 +89,14 @@ public class SetOfLines {
 
 	private void populate_tree(KDTree kdtree, ArrayList<Point> pointSet) {
 		
+		// Insert all points into the kd-tree
 		for(Point p : pointSet){
 			
 			ArrayList<Double> coordinates = p.getCoordinates();
 			
 			double[] key = new double[coordinates.size()];
 			
-			for(int i = 0; i < coordinates.size() - 1; i++){
+			for(int i = 0; i < coordinates.size(); i++){
 				key[i] = coordinates.get(i); 
 			}
 					
@@ -106,12 +107,14 @@ public class SetOfLines {
 
 	private void generate_pairs(ArrayList<Point> pointSet) {
 
+		// Generate all pairs of points in the point set and insert into unmarked_pairs
 		for (int i = 0; i < pointSet.size(); i++) {
 			for (int j = i + 1; j < pointSet.size(); j++) {
+				
 				Pair new_pair;
 				try {
 					new_pair = new Pair(pointSet.get(i), pointSet.get(j));
-					unmarked_pairs.add(new_pair); // money in the bank
+					unmarked_pairs.add(new_pair); 
 
 				} catch (Exception e) {
 					// Dimensions don't match exception
@@ -151,6 +154,9 @@ public class SetOfLines {
 
 	private void march(ArrayList<Point> workingSet, boolean direction) {
 
+		// Try removing the end of the epsilon sequence to see if the 
+		// sequence can be extended any further 
+		
 		remove_opposite_end(workingSet, direction);
 
 		while (workingSet.size() > 1) {
