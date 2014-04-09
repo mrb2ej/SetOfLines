@@ -1,15 +1,40 @@
 package setoflines;
 
+import java.util.ArrayList;
+
 public class Line {
 	
 	private Point initial_point;
 	private Point second_point;
-	private int num_points;
 	
-	public Line (Point initial_point, Point second_point, int num_points){
+	private ArrayList<Point> all_points; 
+	
+	private int num_points = 0;
+	
+	public Line (Point initial_point, Point second_point){
 		this.initial_point = initial_point;
 		this.second_point = second_point;
-		this.num_points = num_points;
+				
+		all_points = new ArrayList<Point>();
+		
+		this.add_point(initial_point);
+		this.add_point(second_point);
+	}
+	
+	public Line (Line line){
+		this.initial_point = line.getInitial_point();
+		this.second_point = line.getSecond_point();
+		this.all_points = new ArrayList<Point>(line.getAllPoints());
+		this.num_points = line.getNum_points();
+	}
+	
+	public void add_point(Point point){
+		all_points.add(point);
+		this.num_points++;
+	}
+	
+	public ArrayList<Point> getAllPoints(){
+		return this.all_points;
 	}
 	
 	public Point getInitial_point() {
