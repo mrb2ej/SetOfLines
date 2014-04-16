@@ -1,12 +1,9 @@
 package setoflines;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.PriorityQueue;
-
-import redblacktree.RedBlackTree;
 
 import net.sf.javaml.core.kdtree.KDTree;
 
@@ -16,7 +13,7 @@ public class SetOfLines {
 	private final boolean RIGHT = true;
 
 	private HashSet<Pair> unmarked_pairs = new HashSet<Pair>();
-	
+
 	private ArrayList<Line> maximal_lines = new ArrayList<Line>();
 
 	private ArrayList<Line> set_of_lines = new ArrayList<Line>();
@@ -54,76 +51,104 @@ public class SetOfLines {
 	private void generate_set_of_lines(ArrayList<Point> pointSet) {
 
 		// Initialize and populate unused_points structure
-		//HashMap<Point, ArrayList<Line>> unused_points = populate_unused_points(pointSet);
-		
-		
-		LinkedList<Bucket> bucket_list = new LinkedList<Bucket>();
-		
-		// TODO: Populate bucket list 
-		
-		//LinkedList<PotentialLine> potential_lines = new LinkedList<PotentialLine>();
-		
-		HashMap<Point, ArrayList<PotentialLine>> unused_points = populate_unused_points(pointSet);
-		
-		
-		
+		// HashMap<Point, ArrayList<Line>> unused_points =
+		// populate_unused_points(pointSet);
+
+		// Bucket front_bucket = populate_bucket_list();
+		Bucket front_bucket = new Bucket(0);
+		ArrayList<PotentialLine> potentialLines = new ArrayList<PotentialLine>();
+		Collections.sort(maximal_lines);
+		for (Line l : maximal_lines) {
+			PotentialLine pl = new PotentialLine();
+			pl.line = l;
+			pl.num_unused_points = l.getNum_points();
+
+			if (pl.num_unused_points == front_bucket.getValue()) {
+				front_bucket.addLine(pl);
+				pl.bucket = front_bucket;
+			} else {
+				Bucket new_bucket = new Bucket(pl.num_unused_points);
+				new_bucket.setNextBucket(front_bucket);
+				front_bucket.setPreviousBucket(new_bucket);
+				front_bucket = new_bucket;
+				front_bucket.addLine(pl);
+				pl.bucket = front_bucket;
+			}
+			potentialLines.add(pl);
+		}
+
+		HashMap<Point, ArrayList<PotentialLine>> unused_points = populate_unused_points(
+				pointSet, potentialLines);
 
 		// Tree, unused_points, num_unused_points
-		while (unused_points.size() > 0){
-			Line selected_line = select_line(bucket_list);
-			
-			for (Point p : selected_line.getAllPoints()){
-				ArrayList<PotentialLine> lines_containing_point = unused_points.get(p);
-				if(lines_containing_point != null){
-					for(PotentialLine l : lines_containing_point){
-						
+		while (unused_points.size() > 0) {
+			Line selected_line = select_line(front_bucket);
+			set_of_lines.add(selected_line);
+
+			for (Point p : selected_line.getAllPoints()) {
+				ArrayList<PotentialLine> lines_containing_point = unused_points
+						.get(p);
+				if (lines_containing_point != null) {
+					for (PotentialLine l : lines_containing_point) {
+
 						// Decrement num unused points
-						
-						// Move PotentialLine to new bucket 
-						
-						
+						l.num_unused_points--;
+
+						// Move PotentialLine to new bucket
+						l.bucket.removeLine(l);
+						l.bucket = l.bucket.getNextBucket();
+						if (l.bucket.getPreviousBucket().isEmpty()) {
+							l.bucket.setPreviousBucket(l.bucket
+									.getPreviousBucket().getPreviousBucket());
+						}
+						if (l.bucket.getValue() != l.num_unused_points) {
+							Bucket new_bucket = new Bucket(l.num_unused_points);
+							new_bucket.setPreviousBucket(l.bucket
+									.getPreviousBucket());
+							if (l.bucket.getPreviousBucket() != null) {
+								l.bucket.getPreviousBucket().setNextBucket(
+										new_bucket);
+							}
+							l.bucket.setPreviousBucket(new_bucket);
+							new_bucket.setNextBucket(l.bucket);
+							l.bucket = new_bucket;
+							new_bucket.addLine(l);
+						} else {
+							l.bucket.addLine(l);
+						}
+
 					}
 				}
-			}			
-		}	
+			}
+		}
 
 	}
-	
-	private Line select_line(RedBlackTree line_tree){
-		
-		return null;
+
+	private Line select_line(Bucket front_bucket) {
+
+		return front_bucket.getPotentialLine().line;
 	}
-	
-	private HashSet<PotentialLine> populate_potential_lines(){
-		HashSet<PotentialLine> potential_lines = new HashSet<PotentialLine>();
-		
-		for(Line l : maximal_lines){
-			// potential_lines.put(l, l.getNum_points());
-		}
-		
-		return potential_lines;
-	}
-	
-	private HashMap<Point, ArrayList<Line>> populate_unused_points(ArrayList<Point> pointSet){
-		
-		
-		HashMap<Point, ArrayList<Line>> unused_points = new HashMap<Point, ArrayList<Line>>();
-		
-		// Iterate through all lines and match every point in every line with 
+
+	private HashMap<Point, ArrayList<PotentialLine>> populate_unused_points(
+			ArrayList<Point> pointSet, ArrayList<PotentialLine> potentialLines) {
+
+		HashMap<Point, ArrayList<PotentialLine>> unused_points = new HashMap<Point, ArrayList<PotentialLine>>();
+
+		// Iterate through all lines and match every point in every line with
 		// all the lines that point is a part of
-		
-		for(Point p : pointSet){					
-			unused_points.put(p, new ArrayList<Line>());			
+
+		for (Point p : pointSet) {
+			unused_points.put(p, new ArrayList<PotentialLine>());
 		}
-		
-		for (Line l : maximal_lines){
-			for(Point p : l.getAllPoints()){
+
+		for (PotentialLine l : potentialLines) {
+			for (Point p : l.line.getAllPoints()) {
 				unused_points.get(p).add(l);
 			}
-		}		
-		
-		return unused_points;	
-		
+		}
+
+		return unused_points;
+
 	}
 
 	private void generate_maximal_lines() {
@@ -136,7 +161,7 @@ public class SetOfLines {
 			// Create new working set and new auxlist
 			Line workingSet = new Line(current_pair.getFirst(),
 					current_pair.getSecond());
-			
+
 			ArrayList<Line> auxlist = new ArrayList<Line>();
 
 			// Add current pair to working set
@@ -217,13 +242,13 @@ public class SetOfLines {
 		}
 	}
 
-	private void remove_opposite_end(Line workingSet,
-			boolean direction) {
+	private void remove_opposite_end(Line workingSet, boolean direction) {
 
 		// Remove the <oposite-direction>-most point from the working set
 		if (direction == LEFT) {
 			// Erase the end of the working set
-			workingSet.getAllPoints().remove(workingSet.getAllPoints().size() - 1);
+			workingSet.getAllPoints().remove(
+					workingSet.getAllPoints().size() - 1);
 		} else {
 			// Erase the beginning of the working set
 			workingSet.getAllPoints().remove(0);
@@ -256,8 +281,7 @@ public class SetOfLines {
 
 	}
 
-	private void update_auxlist(ArrayList<Line> auxlist,
-			Line workingSet) {
+	private void update_auxlist(ArrayList<Line> auxlist, Line workingSet) {
 
 		// Copy the working set
 		Line new_working_set = new Line(workingSet);
@@ -310,7 +334,8 @@ public class SetOfLines {
 
 	private void mark_line(Line line) {
 		for (int i = 0; i < line.getAllPoints().size() - 2; i++) {
-			mark_pair(line.getAllPoints().get(i), line.getAllPoints().get(i + 1));
+			mark_pair(line.getAllPoints().get(i), line.getAllPoints()
+					.get(i + 1));
 		}
 	}
 
@@ -335,8 +360,7 @@ public class SetOfLines {
 
 	}
 
-	private Point get_next_point_guess(Line workingSet,
-			boolean direction) {
+	private Point get_next_point_guess(Line workingSet, boolean direction) {
 
 		Point A = null;
 		Point B = null;
@@ -347,8 +371,10 @@ public class SetOfLines {
 		}
 
 		if (direction == RIGHT) {
-			A = workingSet.getAllPoints().get(workingSet.getAllPoints().size() - 1);
-			B = workingSet.getAllPoints().get(workingSet.getAllPoints().size() - 2);
+			A = workingSet.getAllPoints().get(
+					workingSet.getAllPoints().size() - 1);
+			B = workingSet.getAllPoints().get(
+					workingSet.getAllPoints().size() - 2);
 		}
 
 		return A.add(A.subtract(B));
