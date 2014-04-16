@@ -3,6 +3,7 @@ package setoflines;
 public class PotentialLine {
 	
 	public Line line;
-	public Integer integer;
+	public Integer num_unused_points;
+	private Bucket bucket;
 
 }

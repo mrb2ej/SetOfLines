@@ -3,6 +3,7 @@ package setoflines;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 import redblacktree.RedBlackTree;
@@ -53,30 +54,38 @@ public class SetOfLines {
 	private void generate_set_of_lines(ArrayList<Point> pointSet) {
 
 		// Initialize and populate unused_points structure
-		HashMap<Point, ArrayList<Line>> unused_points = populate_unused_points(pointSet);
-		// HashMap<Line, Integer> num_unused_points = populate_num_unused_points();
-		// HashSet<PotentialLine> potential_lines = 
+		//HashMap<Point, ArrayList<Line>> unused_points = populate_unused_points(pointSet);
 		
-
-		/*		
-		RedBlackTree line_tree = new RedBlackTree();
+		
+		LinkedList<Bucket> bucket_list = new LinkedList<Bucket>();
+		
+		// TODO: Populate bucket list 
+		
+		//LinkedList<PotentialLine> potential_lines = new LinkedList<PotentialLine>();
+		
+		HashMap<Point, ArrayList<PotentialLine>> unused_points = populate_unused_points(pointSet);
+		
+		
+		
 
 		// Tree, unused_points, num_unused_points
 		while (unused_points.size() > 0){
-			Line selected_line = select_line(line_tree);
+			Line selected_line = select_line(bucket_list);
 			
 			for (Point p : selected_line.getAllPoints()){
-				ArrayList<Line> lines_containing_point = unused_points.get(p);
+				ArrayList<PotentialLine> lines_containing_point = unused_points.get(p);
 				if(lines_containing_point != null){
-					for(Line l : lines_containing_point){
-						Integer num_points = num_unused_points.get(l);
-						if(num_points != null){
-							// num_points.intValue()--;
-						}
+					for(PotentialLine l : lines_containing_point){
+						
+						// Decrement num unused points
+						
+						// Move PotentialLine to new bucket 
+						
+						
 					}
 				}
 			}			
-		}	*/	
+		}	
 
 	}
 	
