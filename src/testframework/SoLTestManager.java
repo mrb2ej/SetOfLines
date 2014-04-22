@@ -50,6 +50,9 @@ public class SoLTestManager {
 	}
 
 	private static ArrayList<Point> generate_random_pointset() {
+		
+		// Start with 1000 points and work up
+		
 		return null;
 	}
 

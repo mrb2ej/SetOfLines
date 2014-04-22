@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import lpsolve.*;
 
 import net.sf.javaml.core.kdtree.KDTree;
 
@@ -300,14 +301,56 @@ public class SetOfLines {
 
 		if (next_point != null) {
 			// Check if candidate point fits the line
-			// TODO: check that ^
+			if(fits_the_line(next_point)){
+				workingSet.add_point(next_point);
+			}
 
-			workingSet.add_point(next_point);
 			return true;
 		}
 
 		return false;
 
+	}
+
+	private boolean fits_the_line(Point next_point) {
+		// TODO: Implement this LP solver properly 
+		// (What we have below is an example linear program)
+		
+		boolean pointFits = false;
+		
+		// Create a problem with 4 variables and 0 constraints
+		try {
+			LpSolve solver = LpSolve.makeLp(0, 4);
+
+			// add constraints
+			solver.strAddConstraint("3 2 2 1", LpSolve.LE, 4);
+			solver.strAddConstraint("0 4 3 1", LpSolve.GE, 3);
+
+			// set objective function
+			solver.strSetObjFn("2 3 -2 3");
+
+			// solve the problem
+			solver.solve();
+
+			// print solution
+			System.out.println("Value of objective function: "
+					+ solver.getObjective());
+			double[] var = solver.getPtrVariables();
+			for (int i = 0; i < var.length; i++) {
+				System.out.println("Value of var[" + i + "] = " + var[i]);
+			}
+			
+			// If LP is solved, we have a point that fits
+			// pointFits = true;
+
+			// delete the problem and free memory
+			solver.deleteLp();
+
+		} catch (LpSolveException e) {
+			e.printStackTrace();
+		}
+		
+		return pointFits;
 	}
 
 	private void mark_pair(Point first, Point second) {
