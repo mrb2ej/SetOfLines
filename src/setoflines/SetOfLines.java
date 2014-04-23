@@ -303,9 +303,9 @@ public class SetOfLines {
 			// Check if candidate point fits the line
 			if(fits_the_line(next_point)){
 				workingSet.add_point(next_point);
-			}
-
-			return true;
+				
+				return true;
+			}			
 		}
 
 		return false;
