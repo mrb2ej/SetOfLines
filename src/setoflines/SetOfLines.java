@@ -388,15 +388,22 @@ public class SetOfLines {
 			solver.solve();
 
 			// print solution
-			System.out.println("Value of objective function: "
-					+ solver.getObjective());
+			
+			// This should give us vector <r c>, which is equivalent to x
+			// in the Ax <= b constraint model
+			
+			
+			// System.out.println("Value of objective function: " + solver.getObjective());
+			
 			double[] var = solver.getPtrVariables();
+			// If LP is solved, we have a point that fits
+			pointFits = (var.length == 2);  // This is messy and should be fixed
+			
+			/*
 			for (int i = 0; i < var.length; i++) {
 				System.out.println("Value of var[" + i + "] = " + var[i]);
 			}
-
-			// If LP is solved, we have a point that fits
-			// pointFits = true;
+			*/		
 
 			// delete the problem and free memory
 			solver.deleteLp();
