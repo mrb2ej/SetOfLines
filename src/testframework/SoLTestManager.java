@@ -52,27 +52,32 @@ public class SoLTestManager {
 
 	private static ArrayList<Point> generate_random_pointset() {
 		
-		// Start with 1000 points and work up
+		// Start with 1024 points and work up
 		
 		ArrayList<Point> pointset = new ArrayList<Point>();
 		Random rand = new Random();
+		double pointset_sparsity = 0.7;
 		
 		// This generates 2D point sets
 		for (double x = 0.0; x < 32.0; x++){
-			for (double y = 0.0; y < 32.0; y++){
-				ArrayList<Double> coordinates = new ArrayList<Double>();
+			for (double y = 0.0; y < 32.0; y++){				
 				
-				int x_exponent = rand.nextInt(2);
-				int y_exponent = rand.nextInt(2);
+				if (Math.random() < pointset_sparsity){
+					ArrayList<Double> coordinates = new ArrayList<Double>();
+					
+					int x_exponent = rand.nextInt(2);
+					int y_exponent = rand.nextInt(2);
+					
+					coordinates.add(x + (Math.random() * Math.pow(-1.0, x_exponent)));
+					coordinates.add(y + (Math.random() * Math.pow(-1, y_exponent)));
+					
+					pointset.add(new Point(2, coordinates));
+				}				
 				
-				coordinates.add(x + (Math.random() * Math.pow(-1.0, x_exponent)));
-				coordinates.add(y + (Math.random() * Math.pow(-1, y_exponent)));
-				
-				pointset.add(new Point(2, coordinates));
 			}
 		}
 		
-		return null;
+		return pointset;
 	}
 
 }

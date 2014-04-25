@@ -301,7 +301,7 @@ public class SetOfLines {
 
 		if (next_point != null) {
 			// Check if candidate point fits the line
-			if(fits_the_line(next_point)){
+			if(fits_the_line(next_point, workingSet)){
 				workingSet.add_point(next_point);
 				
 				return true;
@@ -312,9 +312,11 @@ public class SetOfLines {
 
 	}
 
-	private boolean fits_the_line(Point next_point) {
+	private boolean fits_the_line(Point next_point, Line workingSet) {
 		// TODO: Implement this LP solver properly 
 		// (What we have below is an example linear program)
+		
+		// TODO: Add the equation of the line to workingSet
 		
 		boolean pointFits = false;
 		
