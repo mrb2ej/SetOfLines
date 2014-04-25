@@ -61,14 +61,14 @@ public class SetOfLines {
 		// Populate sorted linked-list of buckets of lines
 		generate_list_of_buckets(front_bucket, potentialLines);
 
-		// Use greedy algorithm to select set of lines 
+		// Use greedy algorithm to select set of lines
 		greedy_select_lines(pointSet, potentialLines, front_bucket);
 
 	}
 
 	private void greedy_select_lines(ArrayList<Point> pointSet,
 			ArrayList<PotentialLine> potentialLines, Bucket front_bucket) {
-		
+
 		// Create a map of points to all the potential lines that point is on
 		HashMap<Point, ArrayList<PotentialLine>> unused_points = populate_unused_points(
 				pointSet, potentialLines);
@@ -76,7 +76,7 @@ public class SetOfLines {
 		// Repeatedly select a line from the head bucket and add it to the set
 		// of lines
 		while (unused_points.size() > 0) {
-			
+
 			// Get longest available line and add it to set of lines
 			Line selected_line = select_line(front_bucket);
 			set_of_lines.add(selected_line);
@@ -355,55 +355,58 @@ public class SetOfLines {
 
 		boolean pointFits = false;
 
-		// Create a problem with 1 variable and 2N constraints
+		// Create a problem with 3 variable and 2N constraints
 		// where N is the number of points on the current line
 		try {
-			LpSolve solver = LpSolve.makeLp(workingSet.getNum_points(), 1);
+			LpSolve solver = LpSolve.makeLp(2*workingSet.getNum_points(), 3);
+			solver.setSense(false); // Minimize
+
+			// Set objective function
+			solver.strSetObjFn("1 0 0");
 
 			// add constraints
-			for(int i = 0; i < workingSet.getNum_points(); i++){
-				
+			for (int i = 0; i < workingSet.getNum_points(); i++) {
+
 				// TODO: Add error handling for this
 				Point current_point = workingSet.getAllPoints().get(i);
 				double x = current_point.getCoordinates().get(0);
 				double y = current_point.getCoordinates().get(1);
-				
-				double[] row_firstconstraint = new double[2];
+
+				double[] row_firstconstraint = new double[3];
 				row_firstconstraint[0] = -1.0;
 				row_firstconstraint[1] = -1.0 * x;
-				
-				double[] row_secondconstraint = new double[2];
+				row_firstconstraint[2] = -1.0;
+
+				double[] row_secondconstraint = new double[3];
 				row_secondconstraint[0] = -1.0;
 				row_secondconstraint[1] = x;
-				
+				row_secondconstraint[2] = 1.0;
+
 				solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0 * y);
 				solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
-				
-			}			
 
-			// Set objective function
-			solver.strSetObjFn("1 1");
+			}
 
 			// solve the problem
 			solver.solve();
 
 			// print solution
-			
-			// This should give us vector <r c>, which is equivalent to x
+
+			// This should give us vector <r c d>, which is equivalent to x
 			// in the Ax <= b constraint model
-			
-			
-			// System.out.println("Value of objective function: " + solver.getObjective());
-			
+
+			// System.out.println("Value of objective function: " +
+			// solver.getObjective());
+
 			double[] var = solver.getPtrVariables();
 			// If LP is solved, we have a point that fits
-			pointFits = (var.length == 2);  // This is messy and should be fixed
+			pointFits = (var.length == 3); // This is messy and should be fixed
+			// Check that r is less than epsilon
 			
 			/*
-			for (int i = 0; i < var.length; i++) {
-				System.out.println("Value of var[" + i + "] = " + var[i]);
-			}
-			*/		
+			 * for (int i = 0; i < var.length; i++) {
+			 * System.out.println("Value of var[" + i + "] = " + var[i]); }
+			 */
 
 			// delete the problem and free memory
 			solver.deleteLp();
