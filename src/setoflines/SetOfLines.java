@@ -68,6 +68,7 @@ public class SetOfLines {
 
 	private void greedy_select_lines(ArrayList<Point> pointSet,
 			ArrayList<PotentialLine> potentialLines, Bucket front_bucket) {
+		
 		// Create a map of points to all the potential lines that point is on
 		HashMap<Point, ArrayList<PotentialLine>> unused_points = populate_unused_points(
 				pointSet, potentialLines);
@@ -354,16 +355,34 @@ public class SetOfLines {
 
 		boolean pointFits = false;
 
-		// Create a problem with 4 variables and 0 constraints
+		// Create a problem with 1 variable and 2N constraints
+		// where N is the number of points on the current line
 		try {
-			LpSolve solver = LpSolve.makeLp(0, 4);
+			LpSolve solver = LpSolve.makeLp(workingSet.getNum_points(), 1);
 
 			// add constraints
-			solver.strAddConstraint("3 2 2 1", LpSolve.LE, 4);
-			solver.strAddConstraint("0 4 3 1", LpSolve.GE, 3);
+			for(int i = 0; i < workingSet.getNum_points(); i++){
+				
+				// TODO: Add error handling for this
+				Point current_point = workingSet.getAllPoints().get(i);
+				double x = current_point.getCoordinates().get(0);
+				double y = current_point.getCoordinates().get(1);
+				
+				double[] row_firstconstraint = new double[2];
+				row_firstconstraint[0] = -1.0;
+				row_firstconstraint[1] = -1.0 * x;
+				
+				double[] row_secondconstraint = new double[2];
+				row_secondconstraint[0] = -1.0;
+				row_secondconstraint[1] = x;
+				
+				solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0 * y);
+				solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
+				
+			}			
 
-			// set objective function
-			solver.strSetObjFn("2 3 -2 3");
+			// Set objective function
+			solver.strSetObjFn("1 1");
 
 			// solve the problem
 			solver.solve();
