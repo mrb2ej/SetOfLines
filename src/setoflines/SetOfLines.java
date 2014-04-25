@@ -51,82 +51,116 @@ public class SetOfLines {
 
 	private void generate_set_of_lines(ArrayList<Point> pointSet) {
 
-		// Initialize and populate unused_points structure
-		// HashMap<Point, ArrayList<Line>> unused_points =
-		// populate_unused_points(pointSet);
-
-		// Bucket front_bucket = populate_bucket_list();
+		// Create the first bucket in the unused points bucket list
 		Bucket front_bucket = new Bucket(0);
 		ArrayList<PotentialLine> potentialLines = new ArrayList<PotentialLine>();
+
+		// Sort the epsilon-regular subsequences according to number of points
 		Collections.sort(maximal_lines);
-		for (Line l : maximal_lines) {
-			PotentialLine pl = new PotentialLine();
-			pl.line = l;
-			pl.num_unused_points = l.getNum_points();
 
-			if (pl.num_unused_points == front_bucket.getValue()) {
-				front_bucket.addLine(pl);
-				pl.bucket = front_bucket;
-			} else {
-				Bucket new_bucket = new Bucket(pl.num_unused_points);
-				new_bucket.setNextBucket(front_bucket);
-				front_bucket.setPreviousBucket(new_bucket);
-				front_bucket = new_bucket;
-				front_bucket.addLine(pl);
-				pl.bucket = front_bucket;
-			}
-			potentialLines.add(pl);
-		}
+		// Populate sorted linked-list of buckets of lines
+		generate_list_of_buckets(front_bucket, potentialLines);
 
+		// Use greedy algorithm to select set of lines 
+		greedy_select_lines(pointSet, potentialLines, front_bucket);
+
+	}
+
+	private void greedy_select_lines(ArrayList<Point> pointSet,
+			ArrayList<PotentialLine> potentialLines, Bucket front_bucket) {
+		// Create a map of points to all the potential lines that point is on
 		HashMap<Point, ArrayList<PotentialLine>> unused_points = populate_unused_points(
 				pointSet, potentialLines);
 
-		// Tree, unused_points, num_unused_points
+		// Repeatedly select a line from the head bucket and add it to the set
+		// of lines
 		while (unused_points.size() > 0) {
+			
+			// Get longest available line and add it to set of lines
 			Line selected_line = select_line(front_bucket);
 			set_of_lines.add(selected_line);
 
-			for (Point p : selected_line.getAllPoints()) {
-				ArrayList<PotentialLine> lines_containing_point = unused_points
-						.get(p);
-				if (lines_containing_point != null) {
-					for (PotentialLine l : lines_containing_point) {
+			for (Point current_point : selected_line.getAllPoints()) {
 
-						// Decrement num unused points
-						l.num_unused_points--;
+				ArrayList<PotentialLine> lines_containing_point = unused_points
+						.get(current_point);
+				if (lines_containing_point != null) {
+					for (PotentialLine current_line : lines_containing_point) {
+
+						// Decrement number unused points
+						current_line.num_unused_points--;
 
 						// Move PotentialLine to new bucket
-						l.bucket.removeLine(l);
-						l.bucket = l.bucket.getNextBucket();
-						if (l.bucket.getPreviousBucket().isEmpty()) {
-							l.bucket.setPreviousBucket(l.bucket
-									.getPreviousBucket().getPreviousBucket());
-						}
-						if (l.bucket.getValue() != l.num_unused_points) {
-							Bucket new_bucket = new Bucket(l.num_unused_points);
-							new_bucket.setPreviousBucket(l.bucket
-									.getPreviousBucket());
-							if (l.bucket.getPreviousBucket() != null) {
-								l.bucket.getPreviousBucket().setNextBucket(
-										new_bucket);
-							}
-							l.bucket.setPreviousBucket(new_bucket);
-							new_bucket.setNextBucket(l.bucket);
-							l.bucket = new_bucket;
-							new_bucket.addLine(l);
-						} else {
-							l.bucket.addLine(l);
+						current_line.bucket.removeLine(current_line);
+						current_line.bucket = current_line.bucket
+								.getNextBucket();
+						if (current_line.bucket.getPreviousBucket().isEmpty()) {
+							current_line.bucket
+									.setPreviousBucket(current_line.bucket
+											.getPreviousBucket()
+											.getPreviousBucket());
 						}
 
+						// If we end up between two buckets at a bucket that
+						// doesn't
+						// exist, we need to create the "in-between" bucket for
+						// the line
+						if (current_line.bucket.getValue() != current_line.num_unused_points) {
+							Bucket new_bucket = new Bucket(
+									current_line.num_unused_points);
+							new_bucket.setPreviousBucket(current_line.bucket
+									.getPreviousBucket());
+							if (current_line.bucket.getPreviousBucket() != null) {
+								current_line.bucket.getPreviousBucket()
+										.setNextBucket(new_bucket);
+							}
+							current_line.bucket.setPreviousBucket(new_bucket);
+							new_bucket.setNextBucket(current_line.bucket);
+							current_line.bucket = new_bucket;
+							new_bucket.addLine(current_line);
+						} else {
+							current_line.bucket.addLine(current_line);
+						}
 					}
 				}
 			}
 		}
+	}
 
+	private void generate_list_of_buckets(Bucket front_bucket,
+			ArrayList<PotentialLine> potentialLines) {
+
+		// Populate sorted linked-list of buckets of lines
+		for (Line current_line : maximal_lines) {
+			PotentialLine potential_line = new PotentialLine();
+			potential_line.line = current_line;
+			potential_line.num_unused_points = current_line.getNum_points();
+
+			if (potential_line.num_unused_points == front_bucket.getValue()) {
+
+				// Add potential_line to the proper bucket
+				front_bucket.addLine(potential_line);
+				potential_line.bucket = front_bucket;
+			} else {
+
+				// Because maximal_lines is sorted, if potential_line does not
+				// belong in the first bucket, we need to add a new bucket
+				Bucket new_bucket = new Bucket(potential_line.num_unused_points);
+				new_bucket.setNextBucket(front_bucket);
+				front_bucket.setPreviousBucket(new_bucket);
+				front_bucket = new_bucket;
+
+				// Add potential_line to the proper bucket
+				front_bucket.addLine(potential_line);
+				potential_line.bucket = front_bucket;
+			}
+
+			// Add potential_line to the list of potential lines
+			potentialLines.add(potential_line);
+		}
 	}
 
 	private Line select_line(Bucket front_bucket) {
-
 		return front_bucket.getPotentialLine().line;
 	}
 
@@ -301,11 +335,11 @@ public class SetOfLines {
 
 		if (next_point != null) {
 			// Check if candidate point fits the line
-			if(fits_the_line(next_point, workingSet)){
+			if (fits_the_line(next_point, workingSet)) {
 				workingSet.add_point(next_point);
-				
+
 				return true;
-			}			
+			}
 		}
 
 		return false;
@@ -313,13 +347,13 @@ public class SetOfLines {
 	}
 
 	private boolean fits_the_line(Point next_point, Line workingSet) {
-		// TODO: Implement this LP solver properly 
+		// TODO: Implement this LP solver properly
 		// (What we have below is an example linear program)
-		
+
 		// TODO: Add the equation of the line to workingSet
-		
+
 		boolean pointFits = false;
-		
+
 		// Create a problem with 4 variables and 0 constraints
 		try {
 			LpSolve solver = LpSolve.makeLp(0, 4);
@@ -341,7 +375,7 @@ public class SetOfLines {
 			for (int i = 0; i < var.length; i++) {
 				System.out.println("Value of var[" + i + "] = " + var[i]);
 			}
-			
+
 			// If LP is solved, we have a point that fits
 			// pointFits = true;
 
@@ -351,7 +385,7 @@ public class SetOfLines {
 		} catch (LpSolveException e) {
 			e.printStackTrace();
 		}
-		
+
 		return pointFits;
 	}
 
