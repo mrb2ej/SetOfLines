@@ -1,0 +1,9 @@
+Test 1 of 1
+-------------------------
+Time to Compress: 18ms
+Compression Ratio: 0.0
+Lines: [Initial Point: [0.0, 0.0] | Second Point: [0.0, 1.0] | Num points: 4
+, Initial Point: [1.0, 0.0] | Second Point: [1.0, 1.0] | Num points: 4
+]
+
+

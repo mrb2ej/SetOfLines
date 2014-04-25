@@ -12,14 +12,14 @@ public class SoLTestManager {
 	public static void main(String[] args) {
 
 		TestLog testlog = new TestLog();
-		int num_tests = 1000;
+		int num_tests = 1;
 
 		for (int i = 0; i < num_tests; i++) {
 			// Generate a random point set
 			ArrayList<Point> pointset = generate_random_pointset();
 
 			// Select epsilon error based on point set
-			double epsilon = 0.001;
+			double epsilon = 2.0;
 
 			// Define a dimension for the point set
 			int dimension = 2;
@@ -37,8 +37,13 @@ public class SoLTestManager {
 			// Log the compression statistics
 			testlog.log("Test " + (i + 1) + " of " + num_tests);
 			testlog.log("-------------------------");
-			testlog.log("Time to Compress: " + time_to_compress);
+			testlog.log("Time to Compress: " + time_to_compress + " ms");
 			testlog.log("Compression Ratio: " + compression_ratio);
+			
+			
+			testlog.log("Lines: " + setoflines.get_set_of_lines());
+			
+			
 			testlog.log("\n");
 		}
 
@@ -46,8 +51,10 @@ public class SoLTestManager {
 			testlog.serializeToFile();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
-
+		}	
+		
+		System.out.println("Done");
+		
 	}
 
 	private static ArrayList<Point> generate_random_pointset() {
@@ -56,11 +63,11 @@ public class SoLTestManager {
 		
 		ArrayList<Point> pointset = new ArrayList<Point>();
 		Random rand = new Random();
-		double pointset_sparsity = 0.7;
+		double pointset_sparsity = 1.0;
 		
 		// This generates 2D point sets
-		for (double x = 0.0; x < 32.0; x++){
-			for (double y = 0.0; y < 32.0; y++){				
+		for (double x = 0.0; x < 2.0; x++){
+			for (double y = 0.0; y < 2.0; y++){				
 				
 				if (Math.random() < pointset_sparsity){
 					ArrayList<Double> coordinates = new ArrayList<Double>();
@@ -68,8 +75,11 @@ public class SoLTestManager {
 					int x_exponent = rand.nextInt(2);
 					int y_exponent = rand.nextInt(2);
 					
-					coordinates.add(x + (Math.random() * Math.pow(-1.0, x_exponent)));
-					coordinates.add(y + (Math.random() * Math.pow(-1, y_exponent)));
+					// coordinates.add(x + (Math.random() * Math.pow(-1.0, x_exponent)));
+					// coordinates.add(y + (Math.random() * Math.pow(-1, y_exponent)));
+					
+					coordinates.add(x);
+					coordinates.add(y);
 					
 					pointset.add(new Point(2, coordinates));
 				}				

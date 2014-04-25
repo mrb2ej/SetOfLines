@@ -67,4 +67,7 @@ public class Line implements Comparable<Line> {
 		return this.num_points - o.num_points;
 	}
 
+	public String toString(){
+		return "Initial Point: " + initial_point + " | Second Point: " + second_point + " | Num points: " + num_points + "\n";
+	}
 }

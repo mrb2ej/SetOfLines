@@ -48,18 +48,20 @@ public class SetOfLines {
 		kdtree = null;
 
 	}
+	
+	public ArrayList<Line> get_set_of_lines(){
+		return set_of_lines;
+	}
 
 	private void generate_set_of_lines(ArrayList<Point> pointSet) {
 
-		// Create the first bucket in the unused points bucket list
-		Bucket front_bucket = new Bucket(0);
 		ArrayList<PotentialLine> potentialLines = new ArrayList<PotentialLine>();
 
 		// Sort the epsilon-regular subsequences according to number of points
-		Collections.sort(maximal_lines);
+		Collections.sort(maximal_lines);		
 
 		// Populate sorted linked-list of buckets of lines
-		generate_list_of_buckets(front_bucket, potentialLines);
+		Bucket front_bucket = generate_list_of_buckets(potentialLines);
 
 		// Use greedy algorithm to select set of lines
 		greedy_select_lines(pointSet, potentialLines, front_bucket);
@@ -78,24 +80,24 @@ public class SetOfLines {
 		while (unused_points.size() > 0) {
 
 			// Get longest available line and add it to set of lines
-			Line selected_line = select_line(front_bucket);
+			Line selected_line = select_line(front_bucket);			
 			set_of_lines.add(selected_line);
 
 			for (Point current_point : selected_line.getAllPoints()) {
 
-				ArrayList<PotentialLine> lines_containing_point = unused_points
-						.get(current_point);
+				ArrayList<PotentialLine> lines_containing_point = unused_points.get(current_point);
+				
 				if (lines_containing_point != null) {
 					for (PotentialLine current_line : lines_containing_point) {
 
 						// Decrement number unused points
 						current_line.num_unused_points--;
 
-						// Move PotentialLine to new bucket
+						// Move PotentialLine to new bucket						
 						current_line.bucket.removeLine(current_line);
-						current_line.bucket = current_line.bucket
-								.getNextBucket();
-						if (current_line.bucket.getPreviousBucket().isEmpty()) {
+						current_line.bucket = current_line.bucket.getNextBucket();
+						
+						if (current_line.bucket.getPreviousBucket() != null && current_line.bucket.getPreviousBucket().isEmpty()) {
 							current_line.bucket
 									.setPreviousBucket(current_line.bucket
 											.getPreviousBucket()
@@ -123,13 +125,17 @@ public class SetOfLines {
 							current_line.bucket.addLine(current_line);
 						}
 					}
+					
+					unused_points.remove(current_point);
 				}
 			}
 		}
 	}
 
-	private void generate_list_of_buckets(Bucket front_bucket,
+	private Bucket generate_list_of_buckets(
 			ArrayList<PotentialLine> potentialLines) {
+		// Create the first bucket in the unused points bucket list
+		Bucket front_bucket = new Bucket(0);
 
 		// Populate sorted linked-list of buckets of lines
 		for (Line current_line : maximal_lines) {
@@ -159,10 +165,16 @@ public class SetOfLines {
 			// Add potential_line to the list of potential lines
 			potentialLines.add(potential_line);
 		}
+
+		return front_bucket;
 	}
 
 	private Line select_line(Bucket front_bucket) {
-		return front_bucket.getPotentialLine().line;
+		Bucket current_bucket = front_bucket;
+		while (current_bucket.isEmpty()) {			
+			current_bucket = current_bucket.getNextBucket();
+		}
+		return current_bucket.getPotentialLine().line;
 	}
 
 	private HashMap<Point, ArrayList<PotentialLine>> populate_unused_points(
@@ -348,8 +360,6 @@ public class SetOfLines {
 	}
 
 	private boolean fits_the_line(Point next_point, Line workingSet) {
-		// TODO: Implement this LP solver properly
-		// (What we have below is an example linear program)
 
 		// TODO: Add the equation of the line to workingSet
 
@@ -358,7 +368,7 @@ public class SetOfLines {
 		// Create a problem with 3 variable and 2N constraints
 		// where N is the number of points on the current line
 		try {
-			LpSolve solver = LpSolve.makeLp(2*workingSet.getNum_points(), 3);
+			LpSolve solver = LpSolve.makeLp(2 * workingSet.getNum_points(), 3);
 			solver.setSense(false); // Minimize
 
 			// Set objective function
@@ -402,7 +412,10 @@ public class SetOfLines {
 			// If LP is solved, we have a point that fits
 			pointFits = (var.length == 3); // This is messy and should be fixed
 			// Check that r is less than epsilon
-			
+			// Build initial and second points, checking that r is less than
+			// epsilon
+			// for each one
+
 			/*
 			 * for (int i = 0; i < var.length; i++) {
 			 * System.out.println("Value of var[" + i + "] = " + var[i]); }

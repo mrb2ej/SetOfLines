@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>lpsolve55j.jar</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/lpsolve/lpsolve55j.jar</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

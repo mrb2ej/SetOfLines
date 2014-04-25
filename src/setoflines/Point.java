@@ -69,5 +69,9 @@ public class Point {
 		
 	}
 	
+	public String toString(){
+		return coordinates.toString();
+	}
+	
 
 }
