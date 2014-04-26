@@ -17,8 +17,10 @@ public class Line implements Comparable<Line> {
 
 		all_points = new ArrayList<Point>();
 
+		/*
 		this.add_point(initial_point);
 		this.add_point(second_point);
+		*/
 	}
 
 	public Line(Line line) {

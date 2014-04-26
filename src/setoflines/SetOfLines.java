@@ -32,15 +32,23 @@ public class SetOfLines {
 		// Create the kd-tree
 		kdtree = new KDTree(dimension);
 		populate_tree(kdtree, pointSet);
+		
+		System.out.println("Finished generating kd tree");
 
 		// Generate all pairs
 		generate_pairs(pointSet);
+		
+		System.out.println("Finished generating all pairs");
 
 		// Populates maximal_lines with all maximal epsilon regular subsequences
 		generate_maximal_lines();
 
+		System.out.println("Finished generating maximal epsilon-regular subsequences");		
+		
 		// Select best set of lines from maximal_lines
 		generate_set_of_lines(pointSet);
+		
+		System.out.println("Finished selecting lines from maximal subsquences");
 
 		// Clear all unnecessary data structures
 		maximal_lines = null;
@@ -48,8 +56,8 @@ public class SetOfLines {
 		kdtree = null;
 
 	}
-	
-	public ArrayList<Line> get_set_of_lines(){
+
+	public ArrayList<Line> get_set_of_lines() {
 		return set_of_lines;
 	}
 
@@ -58,7 +66,7 @@ public class SetOfLines {
 		ArrayList<PotentialLine> potentialLines = new ArrayList<PotentialLine>();
 
 		// Sort the epsilon-regular subsequences according to number of points
-		Collections.sort(maximal_lines);		
+		Collections.sort(maximal_lines);
 
 		// Populate sorted linked-list of buckets of lines
 		Bucket front_bucket = generate_list_of_buckets(potentialLines);
@@ -80,24 +88,28 @@ public class SetOfLines {
 		while (unused_points.size() > 0) {
 
 			// Get longest available line and add it to set of lines
-			Line selected_line = select_line(front_bucket);			
+			Line selected_line = select_line(front_bucket);
 			set_of_lines.add(selected_line);
 
 			for (Point current_point : selected_line.getAllPoints()) {
 
-				ArrayList<PotentialLine> lines_containing_point = unused_points.get(current_point);
-				
+				ArrayList<PotentialLine> lines_containing_point = unused_points
+						.get(current_point);
+
 				if (lines_containing_point != null) {
 					for (PotentialLine current_line : lines_containing_point) {
 
 						// Decrement number unused points
 						current_line.num_unused_points--;
 
-						// Move PotentialLine to new bucket						
+						// Move PotentialLine to new bucket
 						current_line.bucket.removeLine(current_line);
-						current_line.bucket = current_line.bucket.getNextBucket();
-						
-						if (current_line.bucket.getPreviousBucket() != null && current_line.bucket.getPreviousBucket().isEmpty()) {
+						current_line.bucket = current_line.bucket
+								.getNextBucket();
+
+						if (current_line.bucket.getPreviousBucket() != null
+								&& current_line.bucket.getPreviousBucket()
+										.isEmpty()) {
 							current_line.bucket
 									.setPreviousBucket(current_line.bucket
 											.getPreviousBucket()
@@ -125,7 +137,7 @@ public class SetOfLines {
 							current_line.bucket.addLine(current_line);
 						}
 					}
-					
+
 					unused_points.remove(current_point);
 				}
 			}
@@ -171,7 +183,7 @@ public class SetOfLines {
 
 	private Line select_line(Bucket front_bucket) {
 		Bucket current_bucket = front_bucket;
-		while (current_bucket.isEmpty()) {			
+		while (current_bucket.isEmpty()) {
 			current_bucket = current_bucket.getNextBucket();
 		}
 		return current_bucket.getPotentialLine().line;
@@ -218,6 +230,8 @@ public class SetOfLines {
 
 			// Initialize the working set for compression
 			initialize(workingSet);
+			
+			System.out.println("Inside generate_maximal_lines: Done initializing");
 
 			// Copy the un-marched working set
 			Line workingSetCopy = new Line(workingSet);
@@ -228,6 +242,8 @@ public class SetOfLines {
 			// March the working set and the copy
 			march(workingSet, RIGHT);
 			march(workingSetCopy, LEFT);
+			
+			System.out.println("Inside generate_maximal_lines: Done marching");
 
 			// Mark all pairs in the current auxlist
 			mark_auxlist(auxlist);
@@ -345,12 +361,15 @@ public class SetOfLines {
 
 		Point next_point = get_next_point(get_next_point_guess(workingSet,
 				direction));
+		
 
 		if (next_point != null) {
 			// Check if candidate point fits the line
-			if (fits_the_line(next_point, workingSet)) {
+			System.out.println("Set: " + workingSet);
+			System.out.println("Cand: " + next_point);
+			if (fits_the_line(next_point, workingSet, direction)) {
 				workingSet.add_point(next_point);
-
+				System.out.println("Success!");
 				return true;
 			}
 		}
@@ -359,29 +378,68 @@ public class SetOfLines {
 
 	}
 
-	private boolean fits_the_line(Point next_point, Line workingSet) {
+	private boolean fits_the_line(Point next_point, Line workingSet, boolean direction) {
 
 		// TODO: Add the equation of the line to workingSet
 
-		boolean pointFits = false;
+		boolean pointFits = true;
+		ArrayList<Double> initial_coordinates = new ArrayList<Double>();
+		ArrayList<Double> second_coordinates = new ArrayList<Double>();
+		
 
-		// Create a problem with 3 variable and 2N constraints
+		// Create a problem with 3 variable and 2N + 2 constraints
 		// where N is the number of points on the current line
 		try {
-			LpSolve solver = LpSolve.makeLp(2 * workingSet.getNum_points(), 3);
-			solver.setSense(false); // Minimize
+			for (int dim = 0; dim < dimension && pointFits; dim++) {
+				LpSolve solver = LpSolve.makeLp(0, 3);
+				// 2 * workingSet.getNum_points() + 2
+				
+				solver.setSense(false); // Minimize
 
-			// Set objective function
-			solver.strSetObjFn("1 0 0");
+				// Set objective function
+				solver.strSetObjFn("1 0 0");
 
-			// add constraints
-			for (int i = 0; i < workingSet.getNum_points(); i++) {
+				// add constraints
+				System.out.println("NUM POINTS: " + workingSet.getNum_points());
+				
+				for (int i = 0; i < workingSet.getNum_points(); i++) {
 
-				// TODO: Add error handling for this
-				Point current_point = workingSet.getAllPoints().get(i);
-				double x = current_point.getCoordinates().get(0);
-				double y = current_point.getCoordinates().get(1);
+					Point current_point = workingSet.getAllPoints().get(i);
+					double x;
+					
+					if(direction == LEFT){
+						x = i + 1;
+					}else{
+						x = i;
+					}
+					
+					double y = current_point.getCoordinates().get(dim);
 
+					double[] row_firstconstraint = new double[3];
+					row_firstconstraint[0] = -1.0;
+					row_firstconstraint[1] = -1.0 * x;
+					row_firstconstraint[2] = -1.0;
+
+					double[] row_secondconstraint = new double[3];
+					row_secondconstraint[0] = -1.0;
+					row_secondconstraint[1] = x;
+					row_secondconstraint[2] = 1.0;
+
+					solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0
+							* y);
+					solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
+
+				}
+				
+				double x;				
+				if (direction == LEFT){
+					x = 0;
+				}else{
+					x = workingSet.getNum_points();
+				}
+				
+				double y = next_point.getCoordinates().get(dim);
+					
 				double[] row_firstconstraint = new double[3];
 				row_firstconstraint[0] = -1.0;
 				row_firstconstraint[1] = -1.0 * x;
@@ -391,38 +449,42 @@ public class SetOfLines {
 				row_secondconstraint[0] = -1.0;
 				row_secondconstraint[1] = x;
 				row_secondconstraint[2] = 1.0;
-
-				solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0 * y);
+				
+				solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0* y);
 				solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
+				
 
+				// solve the problem
+				int check = solver.solve();
+
+				System.out.println("SOLVED LINEAR PROGRAM: " + check);				
+
+				// This should give us vector <r c d>, which is equivalent to x
+				// in the Ax <= b constraint model				
+
+				System.out.println("Value of objective function: " + solver.getObjective());
+				
+				double[] var = solver.getPtrVariables();
+				// If LP is solved, we have a point that fits
+				System.out.println("VAR:" + var[0] + "|" + var[1] + "|" + var[2]);
+				if(var[0] < epsilon)
+				{
+					initial_coordinates.add(var[2]);
+					second_coordinates.add(var[1] + var[2]);
+				}
+				else
+				{
+					pointFits = false;
+				}				
+
+				// delete the problem and free memory
+				solver.deleteLp();
 			}
-
-			// solve the problem
-			solver.solve();
-
-			// print solution
-
-			// This should give us vector <r c d>, which is equivalent to x
-			// in the Ax <= b constraint model
-
-			// System.out.println("Value of objective function: " +
-			// solver.getObjective());
-
-			double[] var = solver.getPtrVariables();
-			// If LP is solved, we have a point that fits
-			pointFits = (var.length == 3); // This is messy and should be fixed
-			// Check that r is less than epsilon
-			// Build initial and second points, checking that r is less than
-			// epsilon
-			// for each one
-
-			/*
-			 * for (int i = 0; i < var.length; i++) {
-			 * System.out.println("Value of var[" + i + "] = " + var[i]); }
-			 */
-
-			// delete the problem and free memory
-			solver.deleteLp();
+			
+			if(pointFits){
+				workingSet.setInitial_point(new Point(dimension, initial_coordinates));
+				workingSet.setSecond_point(new Point(dimension, second_coordinates));			
+			}
 
 		} catch (LpSolveException e) {
 			e.printStackTrace();
@@ -439,7 +501,10 @@ public class SetOfLines {
 			new_pair = new Pair(first, second);
 
 			// remove from unmarked
-			unmarked_pairs.remove(new_pair);
+			boolean check = unmarked_pairs.remove(new_pair);
+			
+			System.out.println("Removed pair from unmarked_pairs " + check);
+			
 
 		} catch (Exception e) {
 			// Dimensions don't match
@@ -448,13 +513,19 @@ public class SetOfLines {
 	}
 
 	private void mark_auxlist(ArrayList<Line> auxlist) {
+		
+		System.out.println("mark_auxlist " + auxlist);
+		
 		for (Line line : auxlist) {
 			mark_line(line);
 		}
 	}
 
 	private void mark_line(Line line) {
-		for (int i = 0; i < line.getAllPoints().size() - 2; i++) {
+		
+		System.out.println("mark_line " + line);
+		
+		for (int i = 0; i < line.getAllPoints().size() - 1; i++) {
 			mark_pair(line.getAllPoints().get(i), line.getAllPoints()
 					.get(i + 1));
 		}

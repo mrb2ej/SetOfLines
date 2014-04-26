@@ -16,10 +16,11 @@ public class SoLTestManager {
 
 		for (int i = 0; i < num_tests; i++) {
 			// Generate a random point set
-			ArrayList<Point> pointset = generate_random_pointset();
-
+			//ArrayList<Point> pointset = generate_random_pointset();
+			ArrayList<Point> pointset = generate_tommy_points();
+			
 			// Select epsilon error based on point set
-			double epsilon = 2.0;
+			double epsilon = 0.01;
 
 			// Define a dimension for the point set
 			int dimension = 2;
@@ -57,6 +58,26 @@ public class SoLTestManager {
 		
 	}
 
+	
+	private static ArrayList<Point> generate_tommy_points() {
+		ArrayList<Point> points = new ArrayList<Point>();
+		points.add(generate2dPoint(0, 0));
+		points.add(generate2dPoint(1, 1));
+		points.add(generate2dPoint(2, 2));
+		points.add(generate2dPoint(1, 0));
+		return points;
+	}
+	
+	private static Point generate2dPoint(double x, double y) {
+		ArrayList<Double> coordinates = new ArrayList<Double>();
+		coordinates.add(x);
+		coordinates.add(y);
+		return new Point(2, coordinates);
+	}
+	
+	
+	
+	
 	private static ArrayList<Point> generate_random_pointset() {
 		
 		// Start with 1024 points and work up
