@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
+import algorithms.NearestNeighbor;
+
 import setoflines.Point;
 import setoflines.SetOfLines;
 
@@ -13,27 +15,31 @@ public class SoLTestManager {
 
 		TestLog testlog = new TestLog();
 		int num_tests = 1;
+		
+		SetOfLines setoflines = null;
 
 		for (int i = 0; i < num_tests; i++) {
 			// Generate a random point set
-			ArrayList<Point> pointset = generate_random_pointset();
-			//ArrayList<Point> pointset = generate_tommy_points();
+			//ArrayList<Point> pointset = generate_random_pointset();
+			ArrayList<Point> pointset = generate_tommy_points();
 			
 			// Select epsilon error based on point set
-			double epsilon = 0.001;
+			double epsilon = 0.01;
 
 			// Define a dimension for the point set
 			int dimension = 2;
 
+			System.out.println("Starting compression");
+			
 			long startTime = System.currentTimeMillis();
-			SetOfLines setoflines = new SetOfLines(pointset, epsilon, dimension);
+			setoflines = new SetOfLines(pointset, epsilon, dimension);
 			long endTime = System.currentTimeMillis();
 
 			// Check time to compress
 			long time_to_compress = endTime - startTime;
 
-			// TODO: How to check compression ratio for the set of lines
-			double compression_ratio = 0;
+			// Check compression ratio for the set of lines
+			double compression_ratio = 2 * ((double)setoflines.get_set_of_lines().size() / (double)pointset.size());
 
 			// Log the compression statistics
 			testlog.log("Test " + (i + 1) + " of " + num_tests);
@@ -56,6 +62,11 @@ public class SoLTestManager {
 		
 		System.out.println("Done");
 		
+		System.out.println("Trying nearest neighbor");
+		
+		Point nn = NearestNeighbor.NearestNeighborSearch(setoflines, generate2dPoint(1,0));
+		System.out.println("Nearest Neighbor result: " + nn);
+		
 	}
 
 	
@@ -76,19 +87,17 @@ public class SoLTestManager {
 	}
 	
 	
-	
-	
 	private static ArrayList<Point> generate_random_pointset() {
 		
 		// Start with 1024 points and work up
 		
 		ArrayList<Point> pointset = new ArrayList<Point>();
 		Random rand = new Random();
-		double pointset_sparsity = 0.7;
+		double pointset_sparsity = 1.0;
 		
 		// This generates 2D point sets
-		for (double x = 0.0; x < 10.0; x++){
-			for (double y = 0.0; y < 10.0; y++){				
+		for (double x = 0.0; x < 25.0; x++){
+			for (double y = 0.0; y < 25.0; y++){				
 				
 				if (Math.random() < pointset_sparsity){
 					ArrayList<Double> coordinates = new ArrayList<Double>();
@@ -96,11 +105,11 @@ public class SoLTestManager {
 					int x_exponent = rand.nextInt(2);
 					int y_exponent = rand.nextInt(2);
 					
-					// coordinates.add(x + (Math.random() * Math.pow(-1.0, x_exponent)));
-					// coordinates.add(y + (Math.random() * Math.pow(-1, y_exponent)));
+					coordinates.add(x + (Math.random() * Math.pow(-1.0, x_exponent)));
+					coordinates.add(y + (Math.random() * Math.pow(-1, y_exponent)));
 					
-					coordinates.add(x);
-					coordinates.add(y);
+					//coordinates.add(x);
+					//coordinates.add(y);
 					
 					pointset.add(new Point(2, coordinates));
 				}				

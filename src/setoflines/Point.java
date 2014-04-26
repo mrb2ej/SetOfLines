@@ -39,7 +39,19 @@ public class Point {
 		return new Point(this.getDimension(), coordinates);
 	}
 	
+	public Point scalarMult(double scalar){
+		
+		ArrayList<Double> new_coordinates = new ArrayList<Double>();
+		
+		for(double coordinate : this.coordinates){
+			new_coordinates.add(coordinate * scalar);
+		}
+		
+		return new Point(this.dimension, new_coordinates);		
+	}
+	
 	public Point subtract (Point p1){
+		// Current point - p1
 		
 		ArrayList<Double> coordinates = new ArrayList<Double>();
 		
@@ -73,5 +85,11 @@ public class Point {
 		return coordinates.toString();
 	}
 	
+	public int hashCode() {
+		// TODO: Adjust for arbitrary dimensions
+		long bits = java.lang.Double.doubleToLongBits(coordinates.get(0));
+		bits ^= java.lang.Double.doubleToLongBits(coordinates.get(1)) * 31;
+		return (((int) bits) ^ ((int) (bits >> 32)));
+	}
 
 }

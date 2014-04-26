@@ -16,15 +16,17 @@ public class Pair {
 	 
 	
 	public int hashCode(){
-		int returnCode = 0;
+		//int returnCode = 0;
 		
+		/*
 		for (double posX : first.getCoordinates()){
 			for (double posY : second.getCoordinates()){
 				returnCode += Double.valueOf(posX).hashCode() * Double.valueOf(posY).hashCode();
 			}
 		}
+		*/
 		
-		return returnCode;
+		return first.hashCode() ^ second.hashCode();
 	}
 	
 	

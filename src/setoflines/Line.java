@@ -18,12 +18,7 @@ public class Line implements Comparable<Line> {
 		this.initial_point = initial_point;
 		this.second_point = second_point;
 
-		all_points = new ArrayList<Point>();
-
-		/*
-		this.add_point(initial_point);
-		this.add_point(second_point);
-		*/
+		all_points = new ArrayList<Point>();		
 	}
 
 	public Line(Line line) {
@@ -70,7 +65,7 @@ public class Line implements Comparable<Line> {
 
 	public void setNum_points(int num_points) {
 		this.num_points = num_points;
-	}
+	}	
 
 	@Override
 	public int compareTo(Line o) {

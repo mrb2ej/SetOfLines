@@ -31,25 +31,17 @@ public class SetOfLines {
 
 		// Create the kd-tree
 		kdtree = new KDTree(dimension);
-		populate_tree(kdtree, pointSet);
+		populate_tree(kdtree, pointSet);		
 		
-		System.out.println("Finished generating kd tree");
-
 		// Generate all pairs
-		generate_pairs(pointSet);
-		
-		System.out.println("Finished generating all pairs");
+		generate_pairs(pointSet);		
 
 		// Populates maximal_lines with all maximal epsilon regular subsequences
-		generate_maximal_lines();
-
-		System.out.println("Finished generating maximal epsilon-regular subsequences");		
+		generate_maximal_lines();		
 		
 		// Select best set of lines from maximal_lines
-		generate_set_of_lines(pointSet);
-		
-		System.out.println("Finished selecting lines from maximal subsquences");
-
+		generate_set_of_lines(pointSet);		
+	
 		// Clear all unnecessary data structures
 		maximal_lines = null;
 		unmarked_pairs = null;
@@ -229,10 +221,8 @@ public class SetOfLines {
 			workingSet.add_point(current_pair.getSecond(), RIGHT);
 
 			// Initialize the working set for compression
-			initialize(workingSet);
+			initialize(workingSet);			
 			
-			System.out.println("Inside generate_maximal_lines: Done initializing");
-
 			// Copy the un-marched working set
 			Line workingSetCopy = new Line(workingSet);
 
@@ -241,9 +231,7 @@ public class SetOfLines {
 
 			// March the working set and the copy
 			march(workingSet, RIGHT);
-			march(workingSetCopy, LEFT);
-			
-			System.out.println("Inside generate_maximal_lines: Done marching");
+			march(workingSetCopy, LEFT);			
 
 			// Mark all pairs in the current auxlist
 			mark_auxlist(auxlist);
@@ -365,14 +353,9 @@ public class SetOfLines {
 		
 
 		if (next_point != null) {
-			// Check if candidate point fits the line
-			System.out.println("Set: " + workingSet);
-			System.out.println("Cand: " + next_point);
-			if (fits_the_line(next_point, workingSet, direction)) {
-				
-				workingSet.add_point(next_point, direction);						
-				
-				System.out.println("Success!");
+			// Check if candidate point fits the line			
+			if (fits_the_line(next_point, workingSet, direction)) {				
+				workingSet.add_point(next_point, direction);				
 				return true;
 			}
 		}
@@ -381,12 +364,7 @@ public class SetOfLines {
 
 	}
 
-	private boolean fits_the_line(Point next_point, Line workingSet, boolean direction) {
-
-		System.out.println("FTL Next point: " + next_point);
-		System.out.println("FTL Working Set: " + workingSet.getAllPoints());
-		System.out.println("FTL Direction: " + direction);
-		
+	private boolean fits_the_line(Point next_point, Line workingSet, boolean direction) {		
 
 		boolean pointFits = true;
 		ArrayList<Double> initial_coordinates = new ArrayList<Double>();
@@ -398,7 +376,7 @@ public class SetOfLines {
 		try {
 			for (int dim = 0; dim < dimension && pointFits; dim++) {
 				LpSolve solver = LpSolve.makeLp(0, 3);
-				solver.setVerbose(2); // Only severe output 
+				solver.setVerbose(1); // Only critical output 
 				// 2 * workingSet.getNum_points() + 2
 				
 				solver.setSense(false); // Minimize
@@ -406,9 +384,7 @@ public class SetOfLines {
 				// Set objective function
 				solver.strSetObjFn("1 0 0");
 
-				// add constraints
-				System.out.println("NUM POINTS: " + workingSet.getNum_points());
-				
+				// add constraints				
 				for (int i = 0; i < workingSet.getNum_points(); i++) {
 
 					Point current_point = workingSet.getAllPoints().get(i);
@@ -462,24 +438,17 @@ public class SetOfLines {
 				
 				solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0* y);
 				solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
-				
-
-				// solver.printLp();
-				
-				
+								
 				// solve the problem
 				int check = solver.solve();
-
-				// System.out.println("SOLVED LINEAR PROGRAM: " + check);				
+								
 
 				// This should give us vector <r c d>, which is equivalent to x
 				// in the Ax <= b constraint model				
-
-				// System.out.println("Value of objective function: " + solver.getObjective());
+			
 				
 				double[] var = solver.getPtrVariables();
-				// If LP is solved, we have a point that fits
-				// System.out.println("VAR:" + var[0] + "|" + var[1] + "|" + var[2]);
+				
 				if(var[0] < epsilon)
 				{
 					initial_coordinates.add(var[2]);
@@ -512,12 +481,8 @@ public class SetOfLines {
 
 		try {
 			new_pair = new Pair(first, second);
-
 			// remove from unmarked
-			boolean check = unmarked_pairs.remove(new_pair);
-			
-			System.out.println("Removed pair from unmarked_pairs " + check);
-			
+			boolean check = unmarked_pairs.remove(new_pair);					
 
 		} catch (Exception e) {
 			// Dimensions don't match
@@ -525,19 +490,13 @@ public class SetOfLines {
 		}
 	}
 
-	private void mark_auxlist(ArrayList<Line> auxlist) {
-		
-		System.out.println("mark_auxlist " + auxlist);
-		
+	private void mark_auxlist(ArrayList<Line> auxlist) {		
 		for (Line line : auxlist) {
 			mark_line(line);
 		}
 	}
 
-	private void mark_line(Line line) {
-		
-		System.out.println("mark_line " + line);
-		
+	private void mark_line(Line line) {		
 		for (int i = 0; i < line.getAllPoints().size() - 1; i++) {
 			mark_pair(line.getAllPoints().get(i), line.getAllPoints()
 					.get(i + 1));
