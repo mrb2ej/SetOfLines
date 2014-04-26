@@ -225,8 +225,8 @@ public class SetOfLines {
 			ArrayList<Line> auxlist = new ArrayList<Line>();
 
 			// Add current pair to working set
-			workingSet.add_point(current_pair.getFirst());
-			workingSet.add_point(current_pair.getSecond());
+			workingSet.add_point(current_pair.getFirst(), RIGHT);
+			workingSet.add_point(current_pair.getSecond(), RIGHT);
 
 			// Initialize the working set for compression
 			initialize(workingSet);
@@ -317,6 +317,7 @@ public class SetOfLines {
 			// Erase the beginning of the working set
 			workingSet.getAllPoints().remove(0);
 		}
+		workingSet.setNum_points(workingSet.getNum_points() - 1);
 	}
 
 	private void march(Line workingSet, boolean direction) {
@@ -368,7 +369,9 @@ public class SetOfLines {
 			System.out.println("Set: " + workingSet);
 			System.out.println("Cand: " + next_point);
 			if (fits_the_line(next_point, workingSet, direction)) {
-				workingSet.add_point(next_point);
+				
+				workingSet.add_point(next_point, direction);						
+				
 				System.out.println("Success!");
 				return true;
 			}
@@ -380,7 +383,10 @@ public class SetOfLines {
 
 	private boolean fits_the_line(Point next_point, Line workingSet, boolean direction) {
 
-		// TODO: Add the equation of the line to workingSet
+		System.out.println("FTL Next point: " + next_point);
+		System.out.println("FTL Working Set: " + workingSet.getAllPoints());
+		System.out.println("FTL Direction: " + direction);
+		
 
 		boolean pointFits = true;
 		ArrayList<Double> initial_coordinates = new ArrayList<Double>();
@@ -392,6 +398,7 @@ public class SetOfLines {
 		try {
 			for (int dim = 0; dim < dimension && pointFits; dim++) {
 				LpSolve solver = LpSolve.makeLp(0, 3);
+				solver.setVerbose(2); // Only severe output 
 				// 2 * workingSet.getNum_points() + 2
 				
 				solver.setSense(false); // Minimize
@@ -415,18 +422,19 @@ public class SetOfLines {
 					
 					double y = current_point.getCoordinates().get(dim);
 
-					double[] row_firstconstraint = new double[3];
-					row_firstconstraint[0] = -1.0;
-					row_firstconstraint[1] = -1.0 * x;
-					row_firstconstraint[2] = -1.0;
+					double[] row_firstconstraint = new double[4];
+					row_firstconstraint[0] = 3.0;
+					row_firstconstraint[1] = -1.0;
+					row_firstconstraint[2] = -1.0 * x;
+					row_firstconstraint[3] = -1.0;
 
-					double[] row_secondconstraint = new double[3];
-					row_secondconstraint[0] = -1.0;
-					row_secondconstraint[1] = x;
-					row_secondconstraint[2] = 1.0;
+					double[] row_secondconstraint = new double[4];
+					row_secondconstraint[0] = 3.0;
+					row_secondconstraint[1] = -1.0;
+					row_secondconstraint[2] = x;
+					row_secondconstraint[3] = 1.0;
 
-					solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0
-							* y);
+					solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0* y);
 					solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
 
 				}
@@ -440,33 +448,38 @@ public class SetOfLines {
 				
 				double y = next_point.getCoordinates().get(dim);
 					
-				double[] row_firstconstraint = new double[3];
-				row_firstconstraint[0] = -1.0;
-				row_firstconstraint[1] = -1.0 * x;
-				row_firstconstraint[2] = -1.0;
+				double[] row_firstconstraint = new double[4];
+				row_firstconstraint[0] = 3.0;
+				row_firstconstraint[1] = -1.0;
+				row_firstconstraint[2] = -1.0 * x;
+				row_firstconstraint[3] = -1.0;
 
-				double[] row_secondconstraint = new double[3];
-				row_secondconstraint[0] = -1.0;
-				row_secondconstraint[1] = x;
-				row_secondconstraint[2] = 1.0;
+				double[] row_secondconstraint = new double[4];
+				row_secondconstraint[0] = 3.0;
+				row_secondconstraint[1] = -1.0;
+				row_secondconstraint[2] = x;
+				row_secondconstraint[3] = 1.0;
 				
 				solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0* y);
 				solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
 				
 
+				// solver.printLp();
+				
+				
 				// solve the problem
 				int check = solver.solve();
 
-				System.out.println("SOLVED LINEAR PROGRAM: " + check);				
+				// System.out.println("SOLVED LINEAR PROGRAM: " + check);				
 
 				// This should give us vector <r c d>, which is equivalent to x
 				// in the Ax <= b constraint model				
 
-				System.out.println("Value of objective function: " + solver.getObjective());
+				// System.out.println("Value of objective function: " + solver.getObjective());
 				
 				double[] var = solver.getPtrVariables();
 				// If LP is solved, we have a point that fits
-				System.out.println("VAR:" + var[0] + "|" + var[1] + "|" + var[2]);
+				// System.out.println("VAR:" + var[0] + "|" + var[1] + "|" + var[2]);
 				if(var[0] < epsilon)
 				{
 					initial_coordinates.add(var[2]);

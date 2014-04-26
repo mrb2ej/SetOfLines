@@ -1,9 +1,23 @@
 Test 1 of 1
 -------------------------
-Time to Compress: 34 ms
+Time to Compress: 1535 ms
 Compression Ratio: 0.0
-Lines: [Initial Point: [0.0, 0.0] | Second Point: [2.0, 2.0] | Num points: 2
-, Initial Point: [1.0, 1.0] | Second Point: [1.0, 0.0] | Num points: 2
+Lines: [Initial Point: [1.0, 1.0] | Second Point: [2.0, 1.0] | Num points: 9
+, Initial Point: [0.0, 7.000000000000001] | Second Point: [1.0, 7.000000000000001] | Num points: 8
+, Initial Point: [0.0, 3.0] | Second Point: [1.0, 3.0] | Num points: 8
+, Initial Point: [0.0, 2.0] | Second Point: [1.0, 2.0] | Num points: 6
+, Initial Point: [3.0000000000000004, 0.0] | Second Point: [3.0000000000000004, 1.0] | Num points: 9
+, Initial Point: [9.0, 1.0000000000000002] | Second Point: [9.0, 3.0] | Num points: 5
+, Initial Point: [2.0000000000000004, 0.0] | Second Point: [3.0000000000000004, 2.0] | Num points: 5
+, Initial Point: [0.0, 5.0] | Second Point: [0.0, 6.0] | Num points: 5
+, Initial Point: [6.0, 0.0] | Second Point: [7.0, 3.9999999999999996] | Num points: 3
+, Initial Point: [7.0, 2.0] | Second Point: [8.0, 2.0] | Num points: 3
+, Initial Point: [2.0, 5.999999999999999] | Second Point: [3.0, 6.999999999999999] | Num points: 4
+, Initial Point: [2.0, 4.0] | Second Point: [9.0, 8.0] | Num points: 2
+, Initial Point: [1.0, 0.0] | Second Point: [3.0, 0.0] | Num points: 3
+, Initial Point: [2.0, 9.0] | Second Point: [4.0, 5.0] | Num points: 2
+, Initial Point: [1.0, 4.0] | Second Point: [6.0, 5.0] | Num points: 2
+, Initial Point: [7.0, 9.0] | Second Point: [8.0, 4.0] | Num points: 2
 ]
 
 

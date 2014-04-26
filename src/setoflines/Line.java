@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 public class Line implements Comparable<Line> {
 
+	private final boolean LEFT = false;
+	private final boolean RIGHT = true;
+	
 	private Point initial_point;
 	private Point second_point;
 
@@ -30,8 +33,14 @@ public class Line implements Comparable<Line> {
 		this.num_points = line.getNum_points();
 	}
 
-	public void add_point(Point point) {
-		all_points.add(point);
+	public void add_point(Point point, boolean direction) {
+		
+		if(direction == RIGHT){
+			all_points.add(point);
+		}else{
+			all_points.add(0, point);
+		}
+		
 		this.num_points++;
 	}
 

@@ -16,11 +16,11 @@ public class SoLTestManager {
 
 		for (int i = 0; i < num_tests; i++) {
 			// Generate a random point set
-			//ArrayList<Point> pointset = generate_random_pointset();
-			ArrayList<Point> pointset = generate_tommy_points();
+			ArrayList<Point> pointset = generate_random_pointset();
+			//ArrayList<Point> pointset = generate_tommy_points();
 			
 			// Select epsilon error based on point set
-			double epsilon = 0.01;
+			double epsilon = 0.001;
 
 			// Define a dimension for the point set
 			int dimension = 2;
@@ -61,10 +61,10 @@ public class SoLTestManager {
 	
 	private static ArrayList<Point> generate_tommy_points() {
 		ArrayList<Point> points = new ArrayList<Point>();
-		points.add(generate2dPoint(0, 0));
-		points.add(generate2dPoint(1, 1));
-		points.add(generate2dPoint(2, 2));
-		points.add(generate2dPoint(1, 0));
+		points.add(generate2dPoint(0.05, 0));
+		points.add(generate2dPoint(1, 1.02));
+		points.add(generate2dPoint(1.998, 2));
+		points.add(generate2dPoint(1, -0.003));
 		return points;
 	}
 	
@@ -84,11 +84,11 @@ public class SoLTestManager {
 		
 		ArrayList<Point> pointset = new ArrayList<Point>();
 		Random rand = new Random();
-		double pointset_sparsity = 1.0;
+		double pointset_sparsity = 0.7;
 		
 		// This generates 2D point sets
-		for (double x = 0.0; x < 2.0; x++){
-			for (double y = 0.0; y < 2.0; y++){				
+		for (double x = 0.0; x < 10.0; x++){
+			for (double y = 0.0; y < 10.0; y++){				
 				
 				if (Math.random() < pointset_sparsity){
 					ArrayList<Double> coordinates = new ArrayList<Double>();
