@@ -1,0 +1,31 @@
+Test 1 of 1
+20x20
+E = 0.001
+S = 1.0
+N = 0.0
+-------------------------
+Time to Compress: 37189 ms
+Compression Ratio: 0.1
+Lines: [Initial Point: [5.0, 0.0] | Second Point: [5.0, 1.0] | Num points: 20
+, Initial Point: [4.0, 0.0] | Second Point: [4.0, 1.0] | Num points: 20
+, Initial Point: [12.000000000000002, 0.0] | Second Point: [12.000000000000002, 1.0] | Num points: 20
+, Initial Point: [17.0, 0.0] | Second Point: [17.0, 1.0] | Num points: 20
+, Initial Point: [2.0, 0.0] | Second Point: [2.0, 1.0] | Num points: 20
+, Initial Point: [19.0, 0.0] | Second Point: [19.0, 1.0] | Num points: 20
+, Initial Point: [10.0, 0.0] | Second Point: [10.0, 1.0] | Num points: 20
+, Initial Point: [0.0, 0.0] | Second Point: [0.0, 1.0] | Num points: 20
+, Initial Point: [18.000000000000004, 0.0] | Second Point: [18.000000000000004, 1.0] | Num points: 20
+, Initial Point: [3.0000000000000004, 0.0] | Second Point: [3.0000000000000004, 1.0] | Num points: 20
+, Initial Point: [6.000000000000001, 0.0] | Second Point: [6.000000000000001, 1.0] | Num points: 20
+, Initial Point: [11.0, 0.0] | Second Point: [11.0, 1.0] | Num points: 20
+, Initial Point: [7.000000000000001, 0.0] | Second Point: [7.000000000000001, 1.0] | Num points: 20
+, Initial Point: [1.0, 0.0] | Second Point: [1.0, 1.0] | Num points: 20
+, Initial Point: [8.0, 0.0] | Second Point: [8.0, 1.0] | Num points: 20
+, Initial Point: [14.000000000000002, 0.0] | Second Point: [14.000000000000002, 1.0] | Num points: 20
+, Initial Point: [16.0, 0.0] | Second Point: [16.0, 1.0] | Num points: 20
+, Initial Point: [13.0, 0.0] | Second Point: [13.0, 1.0] | Num points: 20
+, Initial Point: [9.000000000000002, 0.0] | Second Point: [9.000000000000002, 1.0] | Num points: 20
+, Initial Point: [15.0, 0.0] | Second Point: [15.0, 1.0] | Num points: 20
+]
+
+
