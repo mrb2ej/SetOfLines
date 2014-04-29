@@ -28,8 +28,9 @@ public class SoLTestManager {
 			//ArrayList<Point> pointset = generate_tommy_points();
 			
 			// Select epsilon error based on point set
-			double epsilon = 0.01;
-
+			//double epsilon = 0.01;
+			double epsilon = dynamically_select_epsilon(pointset);
+			
 			// Define a dimension for the point set
 			int dimension = 2;
 
@@ -75,6 +76,19 @@ public class SoLTestManager {
 		
 	}
 
+	// TODO: Finish this method 
+	private static double dynamically_select_epsilon(ArrayList<Point> pointset){
+		
+		// Perform nearest pair on every point in the point set
+		
+		
+		// Calculate Chebyshev distance between nearest pair
+		
+		
+		// Divide by 8 to fit 8e box constraint set in Gabe's paper
+		return 0.01;
+	}	
+	
 	
 	private static ArrayList<Point> generate_tommy_points() {
 		ArrayList<Point> points = new ArrayList<Point>();
