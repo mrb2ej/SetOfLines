@@ -31,7 +31,7 @@ public class TestLog {
 	
 	public void serializeToFile() throws IOException{
 		
-		File file = new File("SetOfLinesTestLog.txt");
+		File file = new File("SetOfLinesTestLog + " + System.currentTimeMillis() + ".txt");
 		 
 		// If file doesn't exists, then create it
 		if (!file.exists()) {

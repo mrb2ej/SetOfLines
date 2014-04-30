@@ -1,9 +1,5 @@
 package testframework;
 
-import java.util.ArrayList;
-
-import setoflines.Point;
-
 public class Test {	
 	
 	private double sparsity;

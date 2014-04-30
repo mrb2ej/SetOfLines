@@ -2,9 +2,6 @@ package testframework;
 
 import java.util.ArrayList;
 
-import setoflines.Pair;
-import setoflines.Point;
-
 public class TestSuite {
 	
 	ArrayList<Test> test_suite;
@@ -14,13 +11,13 @@ public class TestSuite {
 		test_suite = new ArrayList<Test>();	
 		
 		double[] a20x20 = {20,20};
-		double[] a32x32 = {100,100};
+		double[] a32x32 = {32,32};
 		double[] a100x100 = {100,100};
 		
 		ArrayList<double[]> grids = new ArrayList<double[]>();
 		grids.add(a20x20);
 		grids.add(a32x32);
-		grids.add(a100x100);	
+		//grids.add(a100x100);	
 		
 		ArrayList<Double> sparsity_options = new ArrayList<Double>();
 		sparsity_options.add(1.0);
@@ -29,10 +26,10 @@ public class TestSuite {
 		sparsity_options.add(0.2);
 		
 		ArrayList<Double> noise_options = new ArrayList<Double>();
-		noise_options.add(0.0);
+		noise_options.add(0.02);
+		noise_options.add(0.08);
+		noise_options.add(0.1);
 		noise_options.add(0.2);
-		noise_options.add(0.5);
-		noise_options.add(0.7);
 		
 		
 		// Adjust grid size

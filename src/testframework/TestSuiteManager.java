@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import setoflines.Pair;
 import setoflines.Point;
 import setoflines.SetOfLines;
 
@@ -15,30 +14,38 @@ public class TestSuiteManager {
 	public static void main(String[] args) {
 
 		TestLog testlog = new TestLog();
-		int num_test_iterations = 50;
+		int num_test_iterations = 1;
 		SetOfLines setoflines = null;
 
 		for (int i = 0; i < num_test_iterations; i++) {
 
 			TestSuite testSuite = new TestSuite();
 
-			for (Test t : testSuite.getAllTests()) {
+			System.out.println("Starting compression for test suite " + (i + 1)
+					+ " of " + num_test_iterations);
 
+			int x = 0;
+
+			for (Test t : testSuite.getAllTests()) {
+				x++;
 				// Generate a random point set
+				// ArrayList<Point> pointset =
+				// generate_random_pointset(t.getSparsity(), t.getNoise(),
+				// t.getGrid_size());
 				ArrayList<Point> pointset = generate_random_pointset(
 						t.getSparsity(), t.getNoise(), t.getGrid_size());
 
 				// Select epsilon error based on point set
 				// double epsilon = 0.01;
-				double epsilon = dynamically_select_epsilon(pointset);
 
-				System.out.println("Starting compression for test suite "
-						+ (i + 1) + " of " + num_test_iterations);
+				System.out.println("Test " + x + " of "
+						+ testSuite.getAllTests().size() + ": " + grid_log);
 
 				int dimension = t.getGrid_size().length;
 
 				long startTime = System.currentTimeMillis();
-				setoflines = new SetOfLines(pointset, epsilon, dimension);
+				setoflines = new SetOfLines(pointset, dimension);
+				// setoflines = new SetOfLines(pointset, epsilon, dimension);
 				long endTime = System.currentTimeMillis();
 
 				// Check time to compress
@@ -49,8 +56,11 @@ public class TestSuiteManager {
 						.get_set_of_lines().size() / (double) pointset.size());
 
 				// Log the compression statistics
-				testlog.log("Test " + (i + 1) + " of " + num_test_iterations);
-				testlog.log("E: " + epsilon);
+				testlog.log("Iteration " + (i + 1) + " of "
+						+ num_test_iterations);
+				testlog.log("Test " + x + " of "
+						+ testSuite.getAllTests().size());
+				testlog.log("E: " + setoflines.getEpsilon());
 				testlog.log(grid_log);
 				testlog.log("-------------------------");
 				testlog.log("Time to Compress: " + time_to_compress + " ms");
@@ -59,10 +69,11 @@ public class TestSuiteManager {
 				testlog.log("Lines: " + setoflines.get_set_of_lines());
 
 				testlog.log("\n");
-				
-				
-				// Will this build up in memory too much? Test objects are small, right?
-				testlog.log(t, time_to_compress, compression_ratio); 
+
+				// Will this build up in memory too much? Test objects are
+				// small, right?
+				// testlog.log(t, time_to_compress, compression_ratio);
+
 			}
 
 		}
@@ -78,89 +89,90 @@ public class TestSuiteManager {
 
 	}
 
-	// TODO: implement this method
-	private static Pair closest_pair(ArrayList<Point> pointset) {
-		return null;
-	}
+	private static ArrayList<Point> generate_random2D_pointset(
+			double pointset_sparsity, double noise_factor, double[] grid_size) {
 
-	private static double chebyshev_distance(Point p1, Point p2) {
+		ArrayList<Point> pointset = new ArrayList<Point>();
+		Random rand = new Random();
 
-		if (p1.getDimension() != p2.getDimension()) {
-			return -1.0;
-		}
+		double x_size = grid_size[0];
+		double y_size = grid_size[1];
 
-		double distance = -1.0;
+		grid_log = "Grid: " + x_size + "x" + y_size + "\nS: "
+				+ pointset_sparsity + "\nN: " + noise_factor + "\n";
 
-		for (int i = 0; i < p1.getDimension(); i++) {
-			double check_distance = Math.abs(p1.getCoordinates().get(i)
-					- p2.getCoordinates().get(i));
-			if (check_distance > distance) {
-				distance = check_distance;
+		// This generates 2D point sets
+		for (double x = 0.0; x < x_size; x++) {
+			for (double y = 0.0; y < y_size; y++) {
+
+				if (Math.random() < pointset_sparsity) {
+					ArrayList<Double> coordinates = new ArrayList<Double>();
+
+					int x_exponent = rand.nextInt(2);
+					int y_exponent = rand.nextInt(2);
+
+					coordinates.add(x
+							+ (Math.random() * noise_factor * Math.pow(-1.0,
+									x_exponent)));
+					coordinates.add(y
+							+ (Math.random() * noise_factor * Math.pow(-1,
+									y_exponent)));
+
+					pointset.add(new Point(2, coordinates));
+				}
 			}
 		}
-		return distance;
-	}
 
-	private static double dynamically_select_epsilon(ArrayList<Point> pointset) {
-
-		// Perform nearest pair on every point in the point set
-		Pair closestPair = closest_pair(pointset);
-
-		// Calculate Chebyshev distance between nearest pair
-		double distance = chebyshev_distance(closestPair.getFirst(),
-				closestPair.getSecond());
-
-		// Divide by 8 to fit 8e box constraint set in Gabe's paper
-		return distance / 8.0;
+		return pointset;
 	}
 
 	private static ArrayList<Point> generate_random_pointset(
 			double pointset_sparsity, double noise_factor, double[] grid_size) {
 
-		// Check that the grid dimensions are all equal
-		for (int i = 0; i < grid_size.length - 1; i++) {
-			if (grid_size[i] != grid_size[i + 1]) {
-				return null;
-			}
-		}
-
 		// Initialize the grid
 		ArrayList<Point> pointset = new ArrayList<Point>();
 		Random rand = new Random();
-		int dimension = grid_size.length;
+		int dimension = grid_size.length;		
 
-		ArrayList<ArrayList<double[]>> grid = new ArrayList<ArrayList<double[]>>();
-		for (int i = 0; i < dimension; i++) {
+		int[] current_coordinate = new int[dimension];
 
-			ArrayList<double[]> current_axis = new ArrayList<double[]>();
-
-			for (double c = 0.0; c < grid_size[i]; c++) {
-
-				double[] coordinate_and_exponent = new double[2];
-				coordinate_and_exponent[0] = c;
-				coordinate_and_exponent[1] = rand.nextInt(2);
-
-				current_axis.add(coordinate_and_exponent);
-			}
-
-			grid.add(current_axis);
+		for (int i = 0; i < current_coordinate.length; i++) {
+			current_coordinate[i] = 0;
 		}
 
-		for (ArrayList<double[]> axis : grid) {
+		while (current_coordinate[0] < grid_size[0]) {
+			
+			// Possibly make a point at current_coordinate
 			if (Math.random() < pointset_sparsity) {
 				ArrayList<Double> coordinates = new ArrayList<Double>();
 
-				for (double[] points : axis) {
-					double x = points[0];
-					double x_exponent = points[1];
-					coordinates.add(x
+				for(int d = 0; d < dimension; d++){
+					double coord = current_coordinate[d];
+					double coord_exponent = rand.nextInt(2);
+					
+					coordinates.add(coord
 							+ (Math.random() * noise_factor * Math.pow(-1.0,
-									x_exponent)));
+									coord_exponent)));					
 				}
-
+				
 				pointset.add(new Point(dimension, coordinates));
+				
 			}
-		}
+
+			current_coordinate[dimension - 1] += 1;
+			boolean done = false;
+			int current_dim = dimension - 1;
+
+			while (!done && current_dim > 0) {
+				done = true;
+				if (current_coordinate[current_dim] >= grid_size[current_dim]) {
+					done = false;
+					current_coordinate[current_dim] = 0;
+					current_coordinate[current_dim - 1]++;
+				}
+				current_dim--;
+			}
+		}		
 
 		// Log the grid statistics
 		grid_log = "Grid: ";

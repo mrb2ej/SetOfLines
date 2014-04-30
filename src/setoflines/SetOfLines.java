@@ -2,6 +2,7 @@ package setoflines;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import lpsolve.*;
@@ -26,31 +27,58 @@ public class SetOfLines {
 
 	public SetOfLines(ArrayList<Point> pointSet, double epsilon, int dimension) {
 
-		this.epsilon = epsilon;
 		this.dimension = dimension;
+		this.epsilon = epsilon;		
 
 		// Create the kd-tree
 		kdtree = new KDTree(dimension);
-		populate_tree(kdtree, pointSet);		
-		
+		populate_tree(kdtree, pointSet);
+
 		// Generate all pairs
-		generate_pairs(pointSet);		
+		generate_pairs(pointSet);
 
 		// Populates maximal_lines with all maximal epsilon regular subsequences
-		generate_maximal_lines();		
-		
+		generate_maximal_lines();
+
 		// Select best set of lines from maximal_lines
-		generate_set_of_lines(pointSet);		
-	
+		generate_set_of_lines(pointSet);
+
 		// Clear all unnecessary data structures
 		maximal_lines = null;
 		unmarked_pairs = null;
 		kdtree = null;
+	}
+	
+	public SetOfLines(ArrayList<Point> pointSet, int dimension) {
 
+		this.dimension = dimension;
+		this.epsilon = dynamically_select_epsilon(pointSet);		
+
+		// Create the kd-tree
+		kdtree = new KDTree(dimension);
+		populate_tree(kdtree, pointSet);
+
+		// Generate all pairs
+		generate_pairs(pointSet);
+
+		// Populates maximal_lines with all maximal epsilon regular subsequences
+		generate_maximal_lines();
+
+		// Select best set of lines from maximal_lines
+		generate_set_of_lines(pointSet);
+
+		// Clear all unnecessary data structures
+		maximal_lines = null;
+		unmarked_pairs = null;
+		kdtree = null;
 	}
 
 	public ArrayList<Line> get_set_of_lines() {
 		return set_of_lines;
+	}
+	
+	public double getEpsilon(){
+		return epsilon;
 	}
 
 	private void generate_set_of_lines(ArrayList<Point> pointSet) {
@@ -221,8 +249,8 @@ public class SetOfLines {
 			workingSet.add_point(current_pair.getSecond(), RIGHT);
 
 			// Initialize the working set for compression
-			initialize(workingSet);			
-			
+			initialize(workingSet);
+
 			// Copy the un-marched working set
 			Line workingSetCopy = new Line(workingSet);
 
@@ -231,7 +259,7 @@ public class SetOfLines {
 
 			// March the working set and the copy
 			march(workingSet, RIGHT);
-			march(workingSetCopy, LEFT);			
+			march(workingSetCopy, LEFT);
 
 			// Mark all pairs in the current auxlist
 			mark_auxlist(auxlist);
@@ -245,7 +273,7 @@ public class SetOfLines {
 
 		// Insert all points into the kd-tree
 		for (Point p : pointSet) {
-
+			
 			ArrayList<Double> coordinates = p.getCoordinates();
 
 			double[] key = new double[coordinates.size()];
@@ -350,12 +378,11 @@ public class SetOfLines {
 
 		Point next_point = get_next_point(get_next_point_guess(workingSet,
 				direction));
-		
 
 		if (next_point != null) {
-			// Check if candidate point fits the line			
-			if (fits_the_line(next_point, workingSet, direction)) {				
-				workingSet.add_point(next_point, direction);				
+			// Check if candidate point fits the line
+			if (fits_the_line(next_point, workingSet, direction)) {
+				workingSet.add_point(next_point, direction);
 				return true;
 			}
 		}
@@ -364,38 +391,38 @@ public class SetOfLines {
 
 	}
 
-	private boolean fits_the_line(Point next_point, Line workingSet, boolean direction) {		
+	private boolean fits_the_line(Point next_point, Line workingSet,
+			boolean direction) {
 
 		boolean pointFits = true;
 		ArrayList<Double> initial_coordinates = new ArrayList<Double>();
 		ArrayList<Double> second_coordinates = new ArrayList<Double>();
-		
 
 		// Create a problem with 3 variable and 2N + 2 constraints
 		// where N is the number of points on the current line
 		try {
 			for (int dim = 0; dim < dimension && pointFits; dim++) {
 				LpSolve solver = LpSolve.makeLp(0, 3);
-				solver.setVerbose(1); // Only critical output 
+				solver.setVerbose(1); // Only critical output
 				// 2 * workingSet.getNum_points() + 2
-				
+
 				solver.setSense(false); // Minimize
 
 				// Set objective function
 				solver.strSetObjFn("1 0 0");
 
-				// add constraints				
+				// add constraints
 				for (int i = 0; i < workingSet.getNum_points(); i++) {
 
 					Point current_point = workingSet.getAllPoints().get(i);
 					double x;
-					
-					if(direction == LEFT){
+
+					if (direction == LEFT) {
 						x = i + 1;
-					}else{
+					} else {
 						x = i;
 					}
-					
+
 					double y = current_point.getCoordinates().get(dim);
 
 					double[] row_firstconstraint = new double[4];
@@ -410,20 +437,21 @@ public class SetOfLines {
 					row_secondconstraint[2] = x;
 					row_secondconstraint[3] = 1.0;
 
-					solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0* y);
+					solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0
+							* y);
 					solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
 
 				}
-				
-				double x;				
-				if (direction == LEFT){
+
+				double x;
+				if (direction == LEFT) {
 					x = 0;
-				}else{
+				} else {
 					x = workingSet.getNum_points();
 				}
-				
+
 				double y = next_point.getCoordinates().get(dim);
-					
+
 				double[] row_firstconstraint = new double[4];
 				row_firstconstraint[0] = 3.0;
 				row_firstconstraint[1] = -1.0;
@@ -435,37 +463,34 @@ public class SetOfLines {
 				row_secondconstraint[1] = -1.0;
 				row_secondconstraint[2] = x;
 				row_secondconstraint[3] = 1.0;
-				
-				solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0* y);
+
+				solver.addConstraint(row_firstconstraint, LpSolve.LE, -1.0 * y);
 				solver.addConstraint(row_secondconstraint, LpSolve.LE, y);
-								
+
 				// solve the problem
 				int check = solver.solve();
-								
 
 				// This should give us vector <r c d>, which is equivalent to x
-				// in the Ax <= b constraint model				
-			
-				
+				// in the Ax <= b constraint model
+
 				double[] var = solver.getPtrVariables();
-				
-				if(var[0] < epsilon)
-				{
+
+				if (var[0] < epsilon) {
 					initial_coordinates.add(var[2]);
 					second_coordinates.add(var[1] + var[2]);
-				}
-				else
-				{
+				} else {
 					pointFits = false;
-				}				
+				}
 
 				// delete the problem and free memory
 				solver.deleteLp();
 			}
-			
-			if(pointFits){
-				workingSet.setInitial_point(new Point(dimension, initial_coordinates));
-				workingSet.setSecond_point(new Point(dimension, second_coordinates));			
+
+			if (pointFits) {
+				workingSet.setInitial_point(new Point(dimension,
+						initial_coordinates));
+				workingSet.setSecond_point(new Point(dimension,
+						second_coordinates));
 			}
 
 		} catch (LpSolveException e) {
@@ -482,7 +507,7 @@ public class SetOfLines {
 		try {
 			new_pair = new Pair(first, second);
 			// remove from unmarked
-			boolean check = unmarked_pairs.remove(new_pair);					
+			boolean check = unmarked_pairs.remove(new_pair);
 
 		} catch (Exception e) {
 			// Dimensions don't match
@@ -490,13 +515,13 @@ public class SetOfLines {
 		}
 	}
 
-	private void mark_auxlist(ArrayList<Line> auxlist) {		
+	private void mark_auxlist(ArrayList<Line> auxlist) {
 		for (Line line : auxlist) {
 			mark_line(line);
 		}
 	}
 
-	private void mark_line(Line line) {		
+	private void mark_line(Line line) {
 		for (int i = 0; i < line.getAllPoints().size() - 1; i++) {
 			mark_pair(line.getAllPoints().get(i), line.getAllPoints()
 					.get(i + 1));
@@ -542,6 +567,196 @@ public class SetOfLines {
 		}
 
 		return A.add(A.subtract(B));
+	}
+
+	private Pair closest_pair(ArrayList<Point> pointset) {
+		
+		// Pre-sort points
+		ArrayList<ArrayList<Point>> sorted_points = new ArrayList<ArrayList<Point>>();
+		for (int i = 0; i < this.dimension; i++) {
+			sorted_points.add(sort_points_by_dimension(pointset, i));
+			
+		}
+		
+		return closest_pair_helper(sorted_points);
+	}
+
+	private Pair closest_pair_helper(ArrayList<ArrayList<Point>> sorted_points) {
+		
+		ArrayList<Point> first_dim_points = sorted_points.get(0);
+		int points_left = first_dim_points.size();
+		
+		// Base Case
+		if (points_left <= 3) {
+			return brute_force_closest_pair(first_dim_points);
+		}
+		
+		// Divide into 2 subproblems
+		int median = points_left / 2;
+		ArrayList<ArrayList<Point>> left_half = new ArrayList<ArrayList<Point>>();
+		ArrayList<ArrayList<Point>> right_half = new ArrayList<ArrayList<Point>>();
+		ArrayList<Point> left_points = new ArrayList<Point>();
+		ArrayList<Point> right_points = new ArrayList<Point>();
+		HashSet<Point> left_pointset = new HashSet<Point>();
+		for (int i = 0; i < median; i++) {
+			left_points.add(first_dim_points.get(i));
+			left_pointset.add(first_dim_points.get(i));
+		}
+		for (int i = median; i < points_left; i++) {
+			right_points.add(first_dim_points.get(i));
+		}
+		left_half.add(left_points);
+		right_half.add(right_points);
+		for (int i = 1; i < this.dimension; i++) {
+			ArrayList<Point> current_left = new ArrayList<Point>();
+			ArrayList<Point> current_right = new ArrayList<Point>();
+			ArrayList<Point> current_sorted = sorted_points.get(i);
+			for (int j = 0; j < current_sorted.size(); j++) {
+				Point current_point = current_sorted.get(j);
+				if (left_pointset.contains(current_point)) {
+					current_left.add(current_point);
+				} else {
+					current_right.add(current_point);
+				}
+			}
+			left_half.add(current_left);
+			right_half.add(current_right);
+		}
+		// Recursively solve the subproblems
+		Pair left_closest = closest_pair_helper(left_half);
+		Pair right_closest = closest_pair_helper(right_half);
+		double left_distance = -1.0;
+		if(left_closest != null) left_distance = chebyshev_distance(left_closest);
+		
+		double right_distance = -1.0;
+		if(right_closest != null) right_distance = chebyshev_distance(right_closest);
+		
+		Pair closest_pair = left_closest;
+		double closest_distance = left_distance;
+		if ((right_distance < left_distance && right_closest != null) || left_closest == null) {
+			closest_pair = right_closest;
+			closest_distance = right_distance;
+		}
+		// Find closest pair that crosses the hyperplane
+		double best_crossover_distance = -1.0;
+		Pair best_crossover_pair = null;
+		// // Find points within closest_distance of the hyperplane
+		ArrayList<Point> left_close = new ArrayList<Point>();
+		ArrayList<Point> right_close = new ArrayList<Point>();
+		double hyperplane_coordinate = first_dim_points.get(median)
+				.getCoordinates().get(0);
+		double min_coordinate = hyperplane_coordinate - closest_distance;
+		double max_coordinate = hyperplane_coordinate + closest_distance;
+		for (int i = left_points.size() - 1; i >= 0; i--) {
+			if (left_points.get(i).getCoordinates().get(0) >= min_coordinate) {
+				left_close.add(left_points.get(i));
+			} else {
+				break;
+			}
+		}
+		for (int i = 0; i < right_points.size() - 1; i++) {
+			if (right_points.get(i).getCoordinates().get(0) <= max_coordinate) {
+				right_close.add(right_points.get(i));
+			} else {
+				break;
+			}
+		}
+		// // For each point in the left half that is close to the
+		// // hyperplane, check potential points in the right half
+		// // TODO: This isn't optimal
+		for (Point left_p : left_close) {
+			for (Point right_p : right_close) {
+				double current_distance = chebyshev_distance(left_p, right_p);
+				if (current_distance < best_crossover_distance
+						|| best_crossover_distance < 0) {
+					best_crossover_distance = current_distance;
+					try {
+						best_crossover_pair = new Pair(left_p, right_p);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		if (best_crossover_distance < closest_distance && best_crossover_pair != null) {
+			closest_pair = best_crossover_pair;
+		}
+		return closest_pair;
+	}
+
+	private Pair brute_force_closest_pair(ArrayList<Point> points) {
+		double distance = -1.0;
+		Pair closest_pair = null;
+		for (int i = 0; i < points.size(); i++) {
+			Point current_first = points.get(i);
+			for (int j = i + 1; j < points.size(); j++) {
+				Point current_second = points.get(j);
+				double current_distance = chebyshev_distance(current_first,
+						current_second);
+				if (distance < 0 || distance > current_distance) {
+					try {
+						closest_pair = new Pair(current_first, current_second);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		return closest_pair;
+	}
+
+	private ArrayList<Point> sort_points_by_dimension(
+			ArrayList<Point> pointset, final int dim) {
+		
+		ArrayList<Point> sorted_points = new ArrayList<Point>(pointset);
+		Collections.sort(sorted_points, new Comparator<Point>() {
+			@Override
+			public int compare(Point a, Point b) {
+				double a_val = a.getCoordinates().get(dim);
+				double b_val = b.getCoordinates().get(dim);
+				if(a_val > b_val)
+				{
+					return 1;
+				}
+				if(b_val > a_val)
+				{
+					return -1;
+				}
+				return 0;
+			}
+		});
+		return sorted_points;
+	}
+
+	private double chebyshev_distance(Pair p) {
+		return chebyshev_distance(p.first, p.second);
+	}
+
+	private double chebyshev_distance(Point p1, Point p2) {
+		if (p1.getDimension() != p2.getDimension()) {
+			return -1.0;
+		}
+		double distance = -1.0;
+		for (int i = 0; i < p1.getDimension(); i++) {
+			double check_distance = Math.abs(p1.getCoordinates().get(i)
+					- p2.getCoordinates().get(i));
+			if (check_distance > distance) {
+				distance = check_distance;
+			}
+		}
+		return distance;
+	}
+	
+	private double dynamically_select_epsilon(ArrayList<Point> pointset) {
+
+		// Perform nearest pair on every point in the point set
+		Pair closestPair = closest_pair(pointset);
+
+		// Calculate Chebyshev distance between nearest pair
+		double distance = chebyshev_distance(closestPair);
+
+		// Divide by 16 to fit 8e box constraint set in Gabe's paper
+		return distance / 16.0;
 	}
 
 }
