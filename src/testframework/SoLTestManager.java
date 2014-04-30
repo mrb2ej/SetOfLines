@@ -6,6 +6,7 @@ import java.util.Random;
 
 import algorithms.NearestNeighbor;
 
+import setoflines.Pair;
 import setoflines.Point;
 import setoflines.SetOfLines;
 
@@ -75,18 +76,39 @@ public class SoLTestManager {
 		System.out.println("Nearest Neighbor result: " + nn);
 		
 	}
-
-	// TODO: Finish this method 
+	
+	// TODO: implement this method
+	private static Pair closest_pair(ArrayList<Point> pointset){
+		return null;
+	}
+	
+	private static double chebyshev_distance(Point p1, Point p2){
+		
+		if(p1.getDimension() != p2.getDimension()){
+			return -1.0;
+		}		
+		
+		double distance = -1.0;
+		
+		for(int i = 0; i < p1.getDimension(); i++){
+			double check_distance = Math.abs(p1.getCoordinates().get(i) - p2.getCoordinates().get(i));
+			if (check_distance > distance){
+				distance = check_distance;
+			}
+		}
+		return distance;
+	}
+	
 	private static double dynamically_select_epsilon(ArrayList<Point> pointset){
 		
 		// Perform nearest pair on every point in the point set
-		
+		Pair closestPair = closest_pair(pointset);
 		
 		// Calculate Chebyshev distance between nearest pair
-		
+		double distance = chebyshev_distance(closestPair.getFirst(), closestPair.getSecond());
 		
 		// Divide by 8 to fit 8e box constraint set in Gabe's paper
-		return 0.01;
+		return distance / 8.0;
 	}	
 	
 	
