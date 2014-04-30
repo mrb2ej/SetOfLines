@@ -34,5 +34,5 @@ public class Test {
 
 	public void setNoise(double noise) {
 		this.noise = noise;
-	}
+	}	
 }
