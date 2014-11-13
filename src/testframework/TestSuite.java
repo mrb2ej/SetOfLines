@@ -16,7 +16,7 @@ public class TestSuite {
 		
 		ArrayList<double[]> grids = new ArrayList<double[]>();
 		grids.add(a20x20);
-		grids.add(a32x32);
+		//grids.add(a32x32);
 		//grids.add(a100x100);	
 		
 		ArrayList<Double> sparsity_options = new ArrayList<Double>();
